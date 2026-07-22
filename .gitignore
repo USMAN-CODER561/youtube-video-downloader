@@ -1,3 +1,4 @@
 node_modules/
 .env
 downloads/
+# Do NOT ignore bin/ — it's created by build.sh and needed at runtime on Render

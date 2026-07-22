@@ -2,6 +2,21 @@ const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+/**
+ * Returns the path to the yt-dlp binary, using YTDLP_PATH env var if set,
+ * otherwise falling back to 'yt-dlp' (assumes it's on PATH or in ./bin/).
+ */
+function getYtDlpPath() {
+    const envPath = process.env.YTDLP_PATH ? String(process.env.YTDLP_PATH).trim() : '';
+    if (envPath) return envPath;
+    // On Render, the build.sh installs it to ./bin/yt-dlp
+    const localBin = require('path').join(__dirname, '..', 'bin', 'yt-dlp');
+    try {
+        if (require('fs').existsSync(localBin)) return localBin;
+    } catch {}
+    return 'yt-dlp';
+}
+
 function runProcess({ command, args, onStdoutLine, onStderrLine, timeoutMs = 0 }) {
     return new Promise((resolve, reject) => {
         try { console.log('[yt-dlp] spawn', command, JSON.stringify(args)); } catch {}
@@ -239,6 +254,7 @@ async function runDumpJson(url) {
     const validated = validateYouTubeUrl(url);
     console.log('[yt-dlp] dump URL:', validated);
 
+    const ytDlpCmd = getYtDlpPath();
     const jsRuntime = process.env.YTDLP_JS_RUNTIME ? String(process.env.YTDLP_JS_RUNTIME).trim() : '';
     const jsArgs = jsRuntime ? ['--js-runtimes', jsRuntime] : [];
 
@@ -252,7 +268,7 @@ async function runDumpJson(url) {
         ...jsArgs,
         validated,
     ];
-    const { stdout, stderr } = await runProcess({ command: 'yt-dlp', args });
+    const { stdout, stderr } = await runProcess({ command: ytDlpCmd, args });
 
     if (!stdout || !String(stdout).trim().startsWith('{')) {
         const err = new Error('yt-dlp did not return JSON');
@@ -279,14 +295,6 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
 
     const ffmpegPath = process.env.FFMPEG_PATH ? String(process.env.FFMPEG_PATH).trim() : '';
     const ffCmd = ffmpegPath || 'ffmpeg';
-    await runProcess({ command: ffCmd, args: ['-version'], timeoutMs: 10000 }).catch(() => {
-        const err = new Error(
-            'ffmpeg not found. Ensure `ffmpeg` is on PATH or set environment variable FFMPEG_PATH to a full path.'
-        );
-        err.statusCode = 500;
-        throw err;
-    });
-
     console.log('[yt-dlp] download URL:', validated);
 
     const jsRuntime = process.env.YTDLP_JS_RUNTIME ? String(process.env.YTDLP_JS_RUNTIME).trim() : '';
@@ -306,6 +314,8 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
         '--accept-language', process.env.YTDLP_ACCEPT_LANGUAGE || 'en-US,en;q=0.9',
         ...(jsArgs),
     ];
+
+    const ytDlpCmd = getYtDlpPath();
 
     if (isMp3Choice) {
         args = [
@@ -331,7 +341,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
         ];
     }
 
-    await runProcess({ command: 'yt-dlp', args, timeoutMs: 0 });
+    await runProcess({ command: ytDlpCmd, args, timeoutMs: 0 });
 
     // Find produced file (after merge/extract)
     const files = fs.readdirSync(outDir);
@@ -363,6 +373,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
 }
 
 module.exports = {
+    getYtDlpPath,
     runDumpJson,
     runDownloadToFile,
     parseDumpJsonToInfo,

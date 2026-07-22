@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: yt-dlp-downloader
+    env: node
+    region: oregon
+    plan: free
+
+    buildCommand: ./build.sh
+    startCommand: npm start
+
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PORT
+        value: 3000
+      - key: YTDLP_PATH
+        value: ./bin/yt-dlp
+      - key: FFMPEG_PATH
+        value: /usr/bin/ffmpeg
+      - key: NODE_ENV
+        value: production
+

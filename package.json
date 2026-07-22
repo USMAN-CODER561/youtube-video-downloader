@@ -5,7 +5,9 @@
     "type": "commonjs",
     "main": "backend/server.js",
     "scripts": {
-        "start": "node backend/server.js"
+        "build": "chmod +x bin/yt-dlp 2>/dev/null; echo 'Build complete'",
+        "start": "node backend/server.js",
+        "postinstall": "echo 'Run ./build.sh to install yt-dlp and ffmpeg'"
     },
     "dependencies": {
         "body-parser": "^1.20.2",

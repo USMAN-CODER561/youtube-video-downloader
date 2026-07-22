@@ -1,12 +1,13 @@
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const { spawn } = require('child_process');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 
-const { runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
+const { getYtDlpPath, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
 const { runDownloadWithProgress } = require('./ytDlpProgress');
 const progressStore = require('./progressStore');
 const downloadFilesStore = require('./downloadFilesStore');
@@ -335,6 +336,58 @@ app.get('/api/download/file/:jobId', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {
+// ──────────────────────────────────────────────
+//  Startup health check
+// ──────────────────────────────────────────────
+async function checkDependencies() {
+    const ytDlpPath = getYtDlpPath();
+    const ffmpegPath = process.env.FFMPEG_PATH || 'ffmpeg';
+
+    let ytDlpOk = false;
+    let ffmpegOk = false;
+
+    try {
+        const ytOut = await new Promise((resolve, reject) => {
+            const child = spawn(ytDlpPath, ['--version'], { stdio: ['ignore', 'pipe', 'pipe'] });
+            let out = '';
+            child.stdout.on('data', (chunk) => { out += chunk; });
+            child.on('error', reject);
+            child.on('close', (code) => {
+                if (code === 0) resolve(out.trim());
+                else reject(new Error(`exit code ${code}`));
+            });
+        });
+        console.log(`[startup] yt-dlp OK — ${ytDlpPath} (v${ytOut})`);
+        ytDlpOk = true;
+    } catch (err) {
+        console.error(`[startup] FAILED — yt-dlp not found at "${ytDlpPath}". ${err.message}`);
+        console.error('[startup] Download yt-dlp and set YTDLP_PATH, or run ./build.sh');
+    }
+
+    try {
+        const ffOut = await new Promise((resolve, reject) => {
+            const child = spawn(ffmpegPath, ['-version'], { stdio: ['ignore', 'pipe', 'pipe'] });
+            let out = '';
+            child.stdout.on('data', (chunk) => { out += chunk; });
+            child.on('error', reject);
+            child.on('close', (code) => {
+                if (code === 0) resolve(out.split('\n')[0]);
+                else reject(new Error(`exit code ${code}`));
+            });
+        });
+        console.log(`[startup] ffmpeg OK — ${ffOut}`);
+        ffmpegOk = true;
+    } catch (err) {
+        console.error(`[startup] FAILED — ffmpeg not found at "${ffmpegPath}". ${err.message}`);
+        console.error('[startup] Install ffmpeg and set FFMPEG_PATH, or run ./build.sh');
+    }
+
+    if (!ytDlpOk || !ffmpegOk) {
+        console.warn('[startup] WARNING: One or more dependencies are missing. Downloads will fail until this is resolved.');
+    }
+}
+
+app.listen(PORT, async() => {
     console.log(`yt-dlp downloader running at http://localhost:${PORT}`);
+    await checkDependencies();
 });

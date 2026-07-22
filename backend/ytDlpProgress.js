@@ -1,4 +1,5 @@
 const { spawn } = require('child_process');
+const { getYtDlpPath } = require('./ytDlp');
 
 function runProcessStreaming({ command, args, onStdoutLine, onStderrLine }) {
     return new Promise((resolve, reject) => {
@@ -104,8 +105,9 @@ async function runDownloadWithProgress({ url, formatId, outPattern, onProgress, 
         ffmpegPath: ffmpegPath || ''
     });
 
+    const ytDlpCmd = getYtDlpPath();
     await runProcessStreaming({
-        command: 'yt-dlp',
+        command: ytDlpCmd,
         args,
         onStdoutLine: (line) => {
             const parsed = parseProgressJsonLine(line);
