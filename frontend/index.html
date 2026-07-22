@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>yt-dlp Downloader</title>
+    <link rel="stylesheet" href="/styles.css" />
+</head>
+
+<body>
+    <header class="hero">
+        <div class="container heroInner">
+            <div class="brand">
+                <div class="logo" aria-hidden="true">▶</div>
+                <div>
+                    <div class="brandName">yt-Downloader</div>
+                    <div class="brandTag">Download any type of video from Youtube by just pasting a link .</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mainGrid">
+        <section class="card mainCard">
+            <h1 class="h1">Download YouTube videos</h1>
+
+            <form id="urlForm" class="urlRow" autocomplete="off">
+                <div class="urlField">
+                    <input id="urlInput" name="url" type="url" placeholder="Paste YouTube link (youtube.com or youtu.be)" required />
+                </div>
+                <button id="fetchBtn" type="button" class="primary">Fetch Video</button>
+            </form>
+
+            <div id="fetchState" class="state hidden" aria-live="polite">
+                <div class="spinner" aria-hidden="true"></div>
+                <div class="stateText" id="fetchStateText">Fetching…</div>
+            </div>
+
+            <div id="errorBox" class="error hidden" role="alert"></div>
+
+            <section id="preview" class="preview hidden">
+                <div class="previewTop">
+                    <img id="thumb" class="thumb" alt="Video thumbnail" />
+                    <div class="meta">
+                        <div id="title" class="title">—</div>
+                        <div class="durationRow">
+                            <div id="duration" class="duration"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="formatSection">
+                    <div class="formatHeader">
+                        <div class="label">Quality</div>
+                        <div id="formatHint" class="muted">Select a format</div>
+                    </div>
+
+                    <div class="chipGrid" id="formatChips" role="listbox" aria-label="Quality options"></div>
+
+                    <select id="formatSelect" class="hidden" aria-hidden="true"></select>
+                </div>
+
+                <div class="downloadRow">
+                    <button id="downloadBtn" type="button" disabled class="primary">Download</button>
+                </div>
+
+                <div id="downloadState" class="state hidden" aria-live="polite">
+                    <div class="spinner" aria-hidden="true"></div>
+                    <div class="stateText" id="downloadStateText">Preparing download…</div>
+                </div>
+
+                <div id="progressWrap" class="progressWrap hidden">
+                    <div class="progressMeta">
+                        <div id="progressLabel" class="progressLabel">0%</div>
+                        <div id="progressSubText" class="progressSub">Waiting…</div>
+                    </div>
+                    <div class="progressBar" aria-hidden="true">
+                        <div id="progressBarFill" class="progressFill"></div>
+                    </div>
+                </div>
+
+            </section>
+        </section>
+
+        <aside class="card historyCard">
+            <div class="historyHeader">
+                <div class="historyTitle">Download History</div>
+                <div class="muted" id="historyCount">0</div>
+            </div>
+            <div id="historyEmpty" class="historyEmpty">Your downloaded videos will appear here.</div>
+            <div id="historyList" class="historyList" aria-live="polite"></div>
+        </aside>
+    </main>
+
+    <script src="/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,436 @@
+                                                                                                                        /* Premium dark + glassmorphism UI */
+                                                                                                                        
+                                                                                                                         :root {
+                                                                                                                            --bg: #060815;
+                                                                                                                            --text: #eaf0ff;
+                                                                                                                            --muted: rgba(234, 240, 255, .72);
+                                                                                                                            --accent: #7c4dff;
+                                                                                                                            /* electric purple */
+                                                                                                                            --accent2: #00d4ff;
+                                                                                                                            --danger: #ff6a7a;
+                                                                                                                            --border: rgba(255, 255, 255, .10);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        * {
+                                                                                                                            box-sizing: border-box;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        html,
+                                                                                                                        body {
+                                                                                                                            height: 100%;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        body {
+                                                                                                                            margin: 0;
+                                                                                                                            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+                                                                                                                            color: var(--text);
+                                                                                                                            background: radial-gradient(900px 450px at 12% 0%, rgba(124, 77, 255, .30), transparent 55%), radial-gradient(800px 360px at 85% 10%, rgba(0, 212, 255, .20), transparent 50%), radial-gradient(600px 300px at 50% 100%, rgba(124, 77, 255, .12), transparent 60%), var(--bg);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .container {
+                                                                                                                            max-width: 1040px;
+                                                                                                                            margin: 0 auto;
+                                                                                                                            padding: 18px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .hero {
+                                                                                                                            padding: 18px 0 2px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .heroInner {
+                                                                                                                            display: flex;
+                                                                                                                            align-items: center;
+                                                                                                                            justify-content: space-between;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .brand {
+                                                                                                                            display: flex;
+                                                                                                                            gap: 14px;
+                                                                                                                            align-items: center;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .logo {
+                                                                                                                            width: 44px;
+                                                                                                                            height: 44px;
+                                                                                                                            border-radius: 14px;
+                                                                                                                            display: grid;
+                                                                                                                            place-items: center;
+                                                                                                                            font-weight: 800;
+                                                                                                                            color: #0a0520;
+                                                                                                                            background: linear-gradient(135deg, var(--accent), var(--accent2));
+                                                                                                                            box-shadow: 0 14px 40px rgba(124, 77, 255, .35);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .brandName {
+                                                                                                                            font-weight: 900;
+                                                                                                                            letter-spacing: .2px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .brandTag {
+                                                                                                                            color: var(--muted);
+                                                                                                                            font-size: 13px;
+                                                                                                                            margin-top: 2px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .mainGrid {
+                                                                                                                            display: grid;
+                                                                                                                            grid-template-columns: 1fr 320px;
+                                                                                                                            gap: 18px;
+                                                                                                                            align-items: start;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .card {
+                                                                                                                            background: rgba(255, 255, 255, .04);
+                                                                                                                            border: 1px solid var(--border);
+                                                                                                                            border-radius: 16px;
+                                                                                                                            padding: 18px;
+                                                                                                                            box-shadow: 0 18px 60px rgba(0, 0, 0, .30);
+                                                                                                                            backdrop-filter: blur(12px);
+                                                                                                                            -webkit-backdrop-filter: blur(12px);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .mainCard {
+                                                                                                                            animation: inUp .35s ease both;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .historyCard {
+                                                                                                                            position: sticky;
+                                                                                                                            top: 18px;
+                                                                                                                            animation: inUp .45s ease both;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        @keyframes inUp {
+                                                                                                                            from {
+                                                                                                                                opacity: 0;
+                                                                                                                                transform: translateY(10px);
+                                                                                                                            }
+                                                                                                                            to {
+                                                                                                                                opacity: 1;
+                                                                                                                                transform: translateY(0);
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .h1 {
+                                                                                                                            margin: 0 0 14px;
+                                                                                                                            font-size: 20px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .urlRow {
+                                                                                                                            display: flex;
+                                                                                                                            gap: 12px;
+                                                                                                                            align-items: center;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .urlField {
+                                                                                                                            flex: 1;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        input {
+                                                                                                                            width: 100%;
+                                                                                                                            background: rgba(0, 0, 0, .12);
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .12);
+                                                                                                                            border-radius: 14px;
+                                                                                                                            padding: 13px 14px;
+                                                                                                                            outline: none;
+                                                                                                                            color: var(--text);
+                                                                                                                            transition: border-color .15s ease, box-shadow .15s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        input:focus {
+                                                                                                                            border-color: rgba(124, 77, 255, .65);
+                                                                                                                            box-shadow: 0 0 0 4px rgba(124, 77, 255, .15);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .primary {
+                                                                                                                            background: linear-gradient(135deg, rgba(124, 77, 255, .95), rgba(0, 212, 255, .50));
+                                                                                                                            border: 1px solid rgba(124, 77, 255, .55);
+                                                                                                                            color: #0a0520;
+                                                                                                                            padding: 13px 16px;
+                                                                                                                            border-radius: 14px;
+                                                                                                                            cursor: pointer;
+                                                                                                                            font-weight: 800;
+                                                                                                                            transition: transform .06s ease, filter .15s ease, box-shadow .15s ease;
+                                                                                                                            box-shadow: 0 14px 40px rgba(124, 77, 255, .28);
+                                                                                                                            white-space: nowrap;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .primary:hover:not(:disabled) {
+                                                                                                                            filter: brightness(1.05);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .primary:active:not(:disabled) {
+                                                                                                                            transform: translateY(1px);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        button:disabled {
+                                                                                                                            opacity: .55;
+                                                                                                                            cursor: not-allowed;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .state {
+                                                                                                                            display: flex;
+                                                                                                                            gap: 10px;
+                                                                                                                            align-items: center;
+                                                                                                                            margin-top: 14px;
+                                                                                                                            color: var(--muted);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .hidden {
+                                                                                                                            display: none;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .spinner {
+                                                                                                                            width: 18px;
+                                                                                                                            height: 18px;
+                                                                                                                            border-radius: 50%;
+                                                                                                                            border: 2px solid rgba(255, 255, 255, .25);
+                                                                                                                            border-top-color: var(--accent2);
+                                                                                                                            animation: spin 1s linear infinite;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        @keyframes spin {
+                                                                                                                            to {
+                                                                                                                                transform: rotate(360deg);
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .error {
+                                                                                                                            margin-top: 14px;
+                                                                                                                            padding: 12px;
+                                                                                                                            border-radius: 14px;
+                                                                                                                            border: 1px solid rgba(255, 106, 122, .45);
+                                                                                                                            background: rgba(255, 106, 122, .12);
+                                                                                                                            color: #ffd0d6;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .preview {
+                                                                                                                            margin-top: 16px;
+                                                                                                                            padding-top: 14px;
+                                                                                                                            border-top: 1px solid rgba(255, 255, 255, .10);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .previewTop {
+                                                                                                                            display: flex;
+                                                                                                                            gap: 14px;
+                                                                                                                            align-items: center;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .thumb {
+                                                                                                                            width: 170px;
+                                                                                                                            height: 96px;
+                                                                                                                            object-fit: cover;
+                                                                                                                            border-radius: 14px;
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .10);
+                                                                                                                            background: #000;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .meta {
+                                                                                                                            min-width: 0;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .title {
+                                                                                                                            font-size: 16px;
+                                                                                                                            font-weight: 900;
+                                                                                                                            line-height: 1.2;
+                                                                                                                            word-break: break-word;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .duration {
+                                                                                                                            margin-top: 6px;
+                                                                                                                            color: var(--muted);
+                                                                                                                            font-size: 13px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .durationRow {
+                                                                                                                            display: flex;
+                                                                                                                            gap: 10px;
+                                                                                                                            flex-wrap: wrap;
+                                                                                                                            margin-top: 6px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .label {
+                                                                                                                            color: var(--muted);
+                                                                                                                            font-size: 14px;
+                                                                                                                            font-weight: 700;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .muted {
+                                                                                                                            color: var(--muted);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .formatSection {
+                                                                                                                            margin-top: 14px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .formatHeader {
+                                                                                                                            display: flex;
+                                                                                                                            justify-content: space-between;
+                                                                                                                            align-items: baseline;
+                                                                                                                            margin-bottom: 10px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .chipGrid {
+                                                                                                                            display: flex;
+                                                                                                                            flex-wrap: wrap;
+                                                                                                                            gap: 8px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .chip {
+                                                                                                                            appearance: none;
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .12);
+                                                                                                                            background: rgba(255, 255, 255, .03);
+                                                                                                                            color: var(--text);
+                                                                                                                            padding: 10px 12px;
+                                                                                                                            border-radius: 999px;
+                                                                                                                            cursor: pointer;
+                                                                                                                            font-weight: 800;
+                                                                                                                            font-size: 13px;
+                                                                                                                            transition: transform .06s ease, border-color .15s ease, background .15s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .chip:hover {
+                                                                                                                            border-color: rgba(124, 77, 255, .55);
+                                                                                                                            background: rgba(124, 77, 255, .10);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .chip:active {
+                                                                                                                            transform: translateY(1px);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .chip[aria-selected="true"] {
+                                                                                                                            border-color: rgba(0, 212, 255, .55);
+                                                                                                                            background: rgba(0, 212, 255, .12);
+                                                                                                                            box-shadow: 0 0 0 4px rgba(0, 212, 255, .10);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .downloadRow {
+                                                                                                                            margin-top: 14px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .progressWrap {
+                                                                                                                            margin-top: 14px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .progressMeta {
+                                                                                                                            display: flex;
+                                                                                                                            justify-content: space-between;
+                                                                                                                            gap: 10px;
+                                                                                                                            margin-bottom: 8px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .progressLabel {
+                                                                                                                            font-weight: 900;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .progressSub {
+                                                                                                                            color: var(--muted);
+                                                                                                                            font-size: 13px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .progressBar {
+                                                                                                                            height: 11px;
+                                                                                                                            border-radius: 999px;
+                                                                                                                            background: rgba(255, 255, 255, .07);
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .10);
+                                                                                                                            overflow: hidden;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .progressFill {
+                                                                                                                            height: 100%;
+                                                                                                                            width: 0%;
+                                                                                                                            background: linear-gradient(90deg, var(--accent), rgba(0, 212, 255, .55));
+                                                                                                                            transition: width .22s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .historyHeader {
+                                                                                                                            display: flex;
+                                                                                                                            align-items: baseline;
+                                                                                                                            justify-content: space-between;
+                                                                                                                            margin-bottom: 10px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .historyTitle {
+                                                                                                                            font-weight: 900;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .historyEmpty {
+                                                                                                                            color: var(--muted);
+                                                                                                                            font-size: 13px;
+                                                                                                                            padding: 10px;
+                                                                                                                            border: 1px dashed rgba(255, 255, 255, .14);
+                                                                                                                            border-radius: 14px;
+                                                                                                                            background: rgba(0, 0, 0, .10);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .historyList {
+                                                                                                                            display: flex;
+                                                                                                                            flex-direction: column;
+                                                                                                                            gap: 10px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .historyItem {
+                                                                                                                            display: flex;
+                                                                                                                            gap: 10px;
+                                                                                                                            align-items: center;
+                                                                                                                            padding: 10px;
+                                                                                                                            border-radius: 14px;
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .10);
+                                                                                                                            background: rgba(255, 255, 255, .03);
+                                                                                                                            transition: transform .12s ease, border-color .15s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .historyItem:hover {
+                                                                                                                            transform: translateY(-1px);
+                                                                                                                            border-color: rgba(124, 77, 255, .45);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .historyThumb {
+                                                                                                                            width: 42px;
+                                                                                                                            height: 42px;
+                                                                                                                            border-radius: 12px;
+                                                                                                                            object-fit: cover;
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .10);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .historyMeta {
+                                                                                                                            min-width: 0;
+                                                                                                                            flex: 1;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .historyName {
+                                                                                                                            font-weight: 900;
+                                                                                                                            font-size: 13px;
+                                                                                                                            white-space: nowrap;
+                                                                                                                            overflow: hidden;
+                                                                                                                            text-overflow: ellipsis;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .historySub {
+                                                                                                                            margin-top: 4px;
+                                                                                                                            color: var(--muted);
+                                                                                                                            font-size: 12px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        @media (max-width: 860px) {
+                                                                                                                            .mainGrid {
+                                                                                                                                grid-template-columns: 1fr;
+                                                                                                                            }
+                                                                                                                            .historyCard {
+                                                                                                                                position: static;
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        @media (max-width:640px) {
+                                                                                                                            .urlRow {
+                                                                                                                                align-items: stretch;
+                                                                                                                            }
+                                                                                                                            .previewTop {
+                                                                                                                                flex-direction: column;
+                                                                                                                                align-items: flex-start;
+                                                                                                                            }
+                                                                                                                            .thumb {
+                                                                                                                                width: 100%;
+                                                                                                                                height: auto;
+                                                                                                                                aspect-ratio: 16/9;
+                                                                                                                            }
+                                                                                                                        }
