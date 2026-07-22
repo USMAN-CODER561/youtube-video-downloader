@@ -1,6 +1,11 @@
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+
+const WRITABLE_COOKIES_DIR = path.join(os.tmpdir(), 'yt-dlp-downloader-cookies');
+const WRITABLE_COOKIES_FILE = path.join(WRITABLE_COOKIES_DIR, 'cookies.txt');
+let _writableCookiesPath = null;
 
 /**
  * Returns the absolute path to the yt-dlp binary.
@@ -44,11 +49,10 @@ function getFfmpegPath() {
 }
 
 /**
- * Returns the path to the cookies.txt file for authenticated YouTube requests.
- * Priority: YTDLP_COOKIES_PATH env var → /etc/secrets/cookies.txt (Render Secret File)
- * Returns null if no cookies file exists — the caller should proceed without --cookies.
+ * Returns the path to the SOURCE read-only cookies.txt file
+ * (the Render Secret File or user-provided path).
  */
-function getCookiesPath() {
+function getSourceCookiesPath() {
     const envPath = process.env.YTDLP_COOKIES_PATH ?
         String(process.env.YTDLP_COOKIES_PATH).trim() :
         '/etc/secrets/cookies.txt';
@@ -58,6 +62,47 @@ function getCookiesPath() {
         }
     } catch {}
     return null;
+}
+
+/**
+ * Copies the cookies file from the read-only source path to a writable temp location.
+ * This prevents OSError: [Errno 30] Read-only file system when yt-dlp tries to
+ * write updated cookies back to the file. Call once at server startup.
+ * Returns the writable path on success, or null if no source cookies file exists / copy fails.
+ */
+function initCookiesCopy() {
+    const srcPath = getSourceCookiesPath();
+    if (!srcPath) {
+        _writableCookiesPath = null;
+        return null;
+    }
+    try {
+        fs.mkdirSync(WRITABLE_COOKIES_DIR, { recursive: true });
+        fs.copyFileSync(srcPath, WRITABLE_COOKIES_FILE);
+        // Ensure it's writable (not read-only even if source was)
+        try { fs.chmodSync(WRITABLE_COOKIES_FILE, 0o644); } catch {}
+        _writableCookiesPath = WRITABLE_COOKIES_FILE;
+        console.log('[yt-dlp] Cookies file copied to writable location:', _writableCookiesPath);
+        return _writableCookiesPath;
+    } catch (err) {
+        console.error('[yt-dlp] FAILED to copy cookies file from "' + srcPath + '" to "' + WRITABLE_COOKIES_FILE + '":', err.message);
+        _writableCookiesPath = null;
+        return null;
+    }
+}
+
+/**
+ * Returns the path to the cookies.txt file for authenticated YouTube requests.
+ * Returns the WRITABLE copy if available (created by initCookiesCopy), otherwise
+ * falls back to the source secret file path if it exists, or null.
+ */
+function getCookiesPath() {
+    // First, return the writable copy if it was created
+    if (_writableCookiesPath && fs.existsSync(_writableCookiesPath)) {
+        return _writableCookiesPath;
+    }
+    // Fallback to source read-only path (for backward compat / local dev)
+    return getSourceCookiesPath();
 }
 
 /**
@@ -433,6 +478,8 @@ module.exports = {
     getFfmpegPath,
     getCookiesPath,
     getCookiesArgs,
+    getSourceCookiesPath,
+    initCookiesCopy,
     runDumpJson,
     runDownloadToFile,
     parseDumpJsonToInfo,

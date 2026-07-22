@@ -7,7 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 
-const { getYtDlpPath, getFfmpegPath, getCookiesPath, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
+const { getYtDlpPath, getFfmpegPath, getCookiesPath, getSourceCookiesPath, initCookiesCopy, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
 const { runDownloadWithProgress } = require('./ytDlpProgress');
 const progressStore = require('./progressStore');
 const downloadFilesStore = require('./downloadFilesStore');
@@ -384,9 +384,14 @@ async function checkDependencies() {
         console.warn('[startup] WARNING: One or more dependencies are missing. Downloads will fail until this is resolved.');
     }
 
+    const writableCookiesPath = initCookiesCopy();
+
     const cookiesPath = getCookiesPath();
     if (cookiesPath) {
-        console.log('[startup] Cookies file found at "' + cookiesPath + '" - using authenticated requests');
+        const sourcePath = getSourceCookiesPath();
+        console.log('[startup] Cookies source (read-only):', sourcePath);
+        console.log('[startup] Cookies writable copy:', writableCookiesPath || '(copy failed, using source directly)');
+        console.log('[startup] Cookies active path:', cookiesPath);
         try {
             const cookiesStat = fs.statSync(cookiesPath);
             console.log('[startup] Cookies file size:', cookiesStat.size, 'bytes');
