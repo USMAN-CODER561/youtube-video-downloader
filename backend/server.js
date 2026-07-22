@@ -172,6 +172,7 @@ app.post('/api/info', async(req, res) => {
 
         return res.json({ ok: true, video: parsed });
     } catch (err) {
+        console.error('[yt-dlp][api/info][raw-stderr]', err && (err.stderr || err.message || err));
         const friendly = toUserFriendlyYtDlpError(err && (err.stderr || err.message || err));
         const statusCode = err && err.statusCode ? err.statusCode : 500;
         return res.status(statusCode).json({ ok: false, error: friendly });
@@ -288,7 +289,7 @@ app.post('/api/download', async(req, res) => {
                 _fileReady: true
             });
         } catch (err) {
-            console.log('[job] failed', jobId, err && (err.message || err));
+            console.error('[yt-dlp][api/download][raw-stderr]', err && (err.stderr || err.message || err));
             progressStore.setJobProgress(jobId, { status: 'error', percent: 0 });
         }
     })();
@@ -386,6 +387,15 @@ async function checkDependencies() {
     const cookiesPath = getCookiesPath();
     if (cookiesPath) {
         console.log('[startup] Cookies file found at "' + cookiesPath + '" - using authenticated requests');
+        try {
+            const cookiesStat = fs.statSync(cookiesPath);
+            console.log('[startup] Cookies file size:', cookiesStat.size, 'bytes');
+            const cookiesContent = fs.readFileSync(cookiesPath, 'utf8');
+            const firstLine = cookiesContent.split(/\r?\n/)[0] || '(empty file)';
+            console.log('[startup] Cookies file first line:', firstLine);
+        } catch (e) {
+            console.error('[startup] Could not read cookies file details:', e.message);
+        }
     } else {
         console.warn('[startup] No cookies file found - some videos may show "login required" errors');
         console.warn('[startup] Export YouTube cookies as cookies.txt and set YTDLP_COOKIES_PATH or place at /etc/secrets/cookies.txt');

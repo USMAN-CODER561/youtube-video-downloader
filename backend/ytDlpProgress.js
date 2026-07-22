@@ -5,6 +5,8 @@ function runProcessStreaming({ command, args, onStdoutLine, onStderrLine }) {
     return new Promise((resolve, reject) => {
         const child = spawn(command, args, { windowsHide: true });
 
+        let stderrAccumulated = '';
+
         const splitLines = (s) => String(s).split(/\r?\n/).filter(Boolean);
 
         if (child.stdout && onStdoutLine) {
@@ -14,10 +16,13 @@ function runProcessStreaming({ command, args, onStdoutLine, onStderrLine }) {
             });
         }
 
-        if (child.stderr && onStderrLine) {
+        if (child.stderr) {
             child.stderr.on('data', (chunk) => {
                 const str = chunk.toString('utf8');
-                for (const line of splitLines(str)) onStderrLine(line);
+                stderrAccumulated += str;
+                if (onStderrLine) {
+                    for (const line of splitLines(str)) onStderrLine(line);
+                }
             });
         }
 
@@ -25,7 +30,10 @@ function runProcessStreaming({ command, args, onStdoutLine, onStderrLine }) {
 
         child.on('close', (code) => {
             if (code === 0) return resolve({ code });
-            reject(new Error(`yt-dlp exited with code ${code}`));
+            console.error('[yt-dlp][raw-stderr]', stderrAccumulated);
+            const err = new Error(`yt-dlp exited with code ${code}`);
+            err.stderr = stderrAccumulated;
+            reject(err);
         });
     });
 }

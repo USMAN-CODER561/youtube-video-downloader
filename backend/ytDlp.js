@@ -121,6 +121,7 @@ function runProcess({ command, args, onStdoutLine, onStderrLine, timeoutMs = 0 }
             if (code === 0) {
                 resolve({ code, stdout, stderr });
             } else {
+                console.error('[yt-dlp][raw-stderr]', stderr);
                 const err = new Error(`yt-dlp exited with code ${code}`);
                 err.statusCode = 500;
                 err.stderr = stderr;

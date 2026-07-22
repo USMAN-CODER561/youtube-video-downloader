@@ -1,16 +1,12 @@
-# TODO: yt-dlp Downloader Deployment Fixes
+# TODO: Add detailed yt-dlp error logging
 
-## Files Updated
+## Steps
 
-### Backend
-- [x] `backend/ytDlp.js` — Added `getYtDlpPath()` function that checks `YTDLP_PATH` env var, then `./bin/yt-dlp`, then falls back to `'yt-dlp'`. Exported `getYtDlpPath`. Updated `runDumpJson` and `runDownloadToFile` to use `getYtDlpPath()`.
-- [x] `backend/ytDlpProgress.js` — Added `const { getYtDlpPath } = require('./ytDlp')`, updated `runDownloadWithProgress` to use `getYtDlpPath()`.
-- [x] `backend/server.js` — Added `const { spawn } = require('child_process')` and `getYtDlpPath` import. Added `checkDependencies()` async function that verifies yt-dlp + ffmpeg at startup with clear logging. Updated `app.listen()` to call it.
-
-### Build & Config
-- [x] `build.sh` — Downloads yt-dlp binary to `./bin/yt-dlp`, installs ffmpeg static binary.
-- [x] `render.yaml` — Render deployment config (build command: `./build.sh`, start command: `node backend/server.js`).
-- [x] `.gitignore` — Ignores `node_modules/`, `bin/`, `.env`.
-
-- [x] `package.json` — Added `build` script, `postinstall` hint.
+- [x] Plan created and approved
+- [x] 1. `backend/ytDlp.js` — Add raw stderr logging in `runProcess()` on non-zero exit
+- [x] 2. `backend/ytDlpProgress.js` — Accumulate stderr and log it on non-zero exit in `runProcessStreaming()`
+- [x] 3. `backend/server.js` — Log raw stderr in `/api/info` catch block
+- [x] 4. `backend/server.js` — Log raw stderr in `/api/download` catch block
+- [x] 5. `backend/server.js` — Log cookies file size and first line at startup
+- [x] 6. Test with a real YouTube URL to verify raw stderr output
 
