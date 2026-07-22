@@ -1,12 +1,10 @@
-# TODO: Add detailed yt-dlp error logging
+# TODO: Install Deno JS runtime + startup check + yt-dlp flag integration
 
 ## Steps
 
 - [x] Plan created and approved
-- [x] 1. `backend/ytDlp.js` — Add raw stderr logging in `runProcess()` on non-zero exit
-- [x] 2. `backend/ytDlpProgress.js` — Accumulate stderr and log it on non-zero exit in `runProcessStreaming()`
-- [x] 3. `backend/server.js` — Log raw stderr in `/api/info` catch block
-- [x] 4. `backend/server.js` — Log raw stderr in `/api/download` catch block
-- [x] 5. `backend/server.js` — Log cookies file size and first line at startup
-- [x] 6. Test with a real YouTube URL to verify raw stderr output
+- [x] 1. `build.sh` — Add Deno binary download (Linux x86_64 zip from GitHub releases) into `./bin/deno`
+- [x] 2. `backend/ytDlp.js` — Add `getDenoPath()` and `getJsRuntimeArgs()` functions; update `runDumpJson` and `runDownloadToFile` to auto-include `--js-runtimes` via `getJsRuntimeArgs()`
+- [x] 3. `backend/ytDlpProgress.js` — Import `getJsRuntimeArgs` and add to `buildArgsForProgress()` common args
+- [x] 4. `backend/server.js` — Add Deno version check at startup in `checkDependencies()`
 

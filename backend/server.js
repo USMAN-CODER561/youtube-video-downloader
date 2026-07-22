@@ -7,7 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 
-const { getYtDlpPath, getFfmpegPath, getCookiesPath, getSourceCookiesPath, initCookiesCopy, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
+const { getYtDlpPath, getFfmpegPath, getCookiesPath, getSourceCookiesPath, getDenoPath, initCookiesCopy, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
 const { runDownloadWithProgress } = require('./ytDlpProgress');
 const progressStore = require('./progressStore');
 const downloadFilesStore = require('./downloadFilesStore');
@@ -382,6 +382,29 @@ async function checkDependencies() {
 
     if (!ytDlpOk || !ffmpegOk) {
         console.warn('[startup] WARNING: One or more dependencies are missing. Downloads will fail until this is resolved.');
+    }
+
+    // Check Deno (JavaScript runtime for YouTube signature solving)
+    const denoPath = getDenoPath();
+    if (denoPath) {
+        try {
+            const denoOut = await new Promise((resolve, reject) => {
+                const child = spawn(denoPath, ['--version'], { stdio: ['ignore', 'pipe', 'pipe'] });
+                let out = '';
+                child.stdout.on('data', (chunk) => { out += chunk; });
+                child.on('error', reject);
+                child.on('close', (code) => {
+                    if (code === 0) resolve(out.split('\n')[0].trim());
+                    else reject(new Error('exit code ' + code));
+                });
+            });
+            console.log('[startup] Deno OK - ' + denoPath + ' (' + denoOut + ')');
+        } catch (err) {
+            console.warn('[startup] Deno found at "' + denoPath + '" but failed to run: ' + err.message);
+        }
+    } else {
+        console.warn('[startup] Deno NOT FOUND - YouTube signature solving disabled. Some formats may be missing.');
+        console.warn('[startup] Install Deno via ./build.sh or set YTDLP_DENO_PATH');
     }
 
     const writableCookiesPath = initCookiesCopy();

@@ -49,12 +49,39 @@ else
 fi
 
 # ──────────────────────────────────────────────
-#  3) Verify installations
+#  3) Download Deno binary (for JS runtime / YouTube signature solving)
+# ──────────────────────────────────────────────
+DENO_URL="https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip"
+DENO_ZIP="deno-x86_64-unknown-linux-gnu.zip"
+DENO_BIN="./bin/deno"
+
+if [ ! -f "$DENO_BIN" ]; then
+    echo "[build] Downloading Deno static binary from GitHub..."
+    if curl -sL "$DENO_URL" -o "$DENO_ZIP"; then
+        unzip -o "$DENO_ZIP" -d ./bin/ > /dev/null 2>&1
+        chmod +x "$DENO_BIN"
+        rm -f "$DENO_ZIP"
+        echo "[build] Deno installed at $(pwd)/bin/deno"
+    else
+        echo "[build] ERROR: Failed to download Deno from $DENO_URL"
+        exit 1
+    fi
+else
+    echo "[build] Deno binary already exists, skipping download."
+fi
+
+# ──────────────────────────────────────────────
+#  4) Verify installations
 # ──────────────────────────────────────────────
 echo ""
 echo "[build] === Verification ==="
 echo "  yt-dlp version: $(./bin/yt-dlp --version 2>&1)"
 echo "  ffmpeg version: $(./bin/ffmpeg -version 2>&1 | head -n1)"
+if [ -f "$DENO_BIN" ]; then
+    echo "  deno version: $(./bin/deno --version 2>&1 | head -n1)"
+else
+    echo "  deno: NOT INSTALLED"
+fi
 echo ""
 
 # The binaries are now in ./bin/ relative to the project root.
@@ -62,7 +89,7 @@ echo ""
 echo "[build] Binaries installed successfully in $(pwd)/bin/"
 
 # ──────────────────────────────────────────────
-#  4) Install npm dependencies
+#  5) Install npm dependencies
 # ──────────────────────────────────────────────
 echo "[build] Installing npm dependencies..."
 npm install --production

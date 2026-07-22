@@ -49,6 +49,51 @@ function getFfmpegPath() {
 }
 
 /**
+ * Returns the absolute path to the Deno binary, or null if not found.
+ * Priority: YTDLP_DENO_PATH env var → ./bin/deno (project-local) → 'deno' (PATH)
+ * Deno is used by yt-dlp as a JavaScript runtime to solve YouTube's
+ * signature/cipher challenges and unlock real video/audio format URLs.
+ */
+function getDenoPath() {
+    const envPath = process.env.YTDLP_DENO_PATH ? String(process.env.YTDLP_DENO_PATH).trim() : '';
+    if (envPath) {
+        if (!path.isAbsolute(envPath)) {
+            const resolved = path.resolve(__dirname, '..', envPath);
+            try { if (fs.existsSync(resolved)) return resolved; } catch {}
+        }
+        return path.resolve(envPath);
+    }
+    // Fallback: check project-local bin directory
+    const localBin = path.join(__dirname, '..', 'bin', 'deno');
+    try {
+        if (fs.existsSync(localBin)) return localBin;
+    } catch {}
+    // Check PATH
+    try {
+        const which = require('child_process').spawnSync('which', ['deno'], { stdio: 'pipe' });
+        if (which.status === 0) {
+            const p = String(which.stdout).trim();
+            if (p) return p;
+        }
+    } catch {}
+    return null;
+}
+
+/**
+ * Returns the --js-runtimes CLI args array if a Deno binary is available,
+ * otherwise returns an empty array.
+ * yt-dlp uses this flag to specify the JavaScript runtime for solving
+ * YouTube signature challenges. Without this, formats will lack real URLs.
+ */
+function getJsRuntimeArgs() {
+    const denoPath = getDenoPath();
+    if (denoPath) {
+        return ['--js-runtimes', denoPath];
+    }
+    return [];
+}
+
+/**
  * Returns the path to the SOURCE read-only cookies.txt file
  * (the Render Secret File or user-provided path).
  */
@@ -354,8 +399,7 @@ async function runDumpJson(url) {
     console.log('[yt-dlp] dump URL:', validated);
 
     const ytDlpCmd = getYtDlpPath();
-    const jsRuntime = process.env.YTDLP_JS_RUNTIME ? String(process.env.YTDLP_JS_RUNTIME).trim() : '';
-    const jsArgs = jsRuntime ? ['--js-runtimes', jsRuntime] : [];
+    const jsArgs = getJsRuntimeArgs();
 
     const args = [
         '--dump-json',
@@ -397,8 +441,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
     const ffCmd = ffmpegPath || 'ffmpeg';
     console.log('[yt-dlp] download URL:', validated);
 
-    const jsRuntime = process.env.YTDLP_JS_RUNTIME ? String(process.env.YTDLP_JS_RUNTIME).trim() : '';
-    const jsArgs = jsRuntime ? ['--js-runtimes', jsRuntime] : [];
+    const jsArgs = getJsRuntimeArgs();
 
     // Keep existing behavior: if MP3 requested, extract audio; otherwise force mp4 merge.
     const isMp3Choice = formatIdStr.toLowerCase().includes('mp3');
@@ -476,6 +519,8 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
 module.exports = {
     getYtDlpPath,
     getFfmpegPath,
+    getDenoPath,
+    getJsRuntimeArgs,
     getCookiesPath,
     getCookiesArgs,
     getSourceCookiesPath,
