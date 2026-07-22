@@ -43,6 +43,33 @@ function getFfmpegPath() {
     return 'ffmpeg';
 }
 
+/**
+ * Returns the path to the cookies.txt file for authenticated YouTube requests.
+ * Priority: YTDLP_COOKIES_PATH env var → /etc/secrets/cookies.txt (Render Secret File)
+ * Returns null if no cookies file exists — the caller should proceed without --cookies.
+ */
+function getCookiesPath() {
+    const envPath = process.env.YTDLP_COOKIES_PATH ?
+        String(process.env.YTDLP_COOKIES_PATH).trim() :
+        '/etc/secrets/cookies.txt';
+    try {
+        if (fs.existsSync(envPath)) {
+            return path.resolve(envPath);
+        }
+    } catch {}
+    return null;
+}
+
+/**
+ * Returns the --cookies CLI args array if a cookies file is available, otherwise empty array.
+ * Use this in all yt-dlp command constructions.
+ */
+function getCookiesArgs() {
+    const cp = getCookiesPath();
+    if (cp) return ['--cookies', cp];
+    return [];
+}
+
 function runProcess({ command, args, onStdoutLine, onStderrLine, timeoutMs = 0 }) {
     return new Promise((resolve, reject) => {
         try { console.log('[yt-dlp] spawn', command, JSON.stringify(args)); } catch {}
@@ -291,6 +318,7 @@ async function runDumpJson(url) {
         '--fragment-retries', '3',
         '--no-continue',
         '--user-agent', process.env.YTDLP_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36',
+        ...getCookiesArgs(),
         ...jsArgs,
         validated,
     ];
@@ -338,6 +366,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
         '--no-continue',
         '--user-agent', process.env.YTDLP_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36',
         '--accept-language', process.env.YTDLP_ACCEPT_LANGUAGE || 'en-US,en;q=0.9',
+        ...getCookiesArgs(),
         ...(jsArgs),
     ];
 
@@ -401,6 +430,8 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
 module.exports = {
     getYtDlpPath,
     getFfmpegPath,
+    getCookiesPath,
+    getCookiesArgs,
     runDumpJson,
     runDownloadToFile,
     parseDumpJsonToInfo,

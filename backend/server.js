@@ -7,7 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 
-const { getYtDlpPath, getFfmpegPath, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
+const { getYtDlpPath, getFfmpegPath, getCookiesPath, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
 const { runDownloadWithProgress } = require('./ytDlpProgress');
 const progressStore = require('./progressStore');
 const downloadFilesStore = require('./downloadFilesStore');
@@ -285,7 +285,7 @@ app.post('/api/download', async(req, res) => {
             progressStore.setJobProgress(jobId, {
                 status: 'finished',
                 percent: 100,
-                _fileReady: true // CRITICAL: distinguishes from yt-dlp's intermediate stream "finished" events
+                _fileReady: true
             });
         } catch (err) {
             console.log('[job] failed', jobId, err && (err.message || err));
@@ -320,7 +320,6 @@ app.get('/api/download/file/:jobId', (req, res) => {
 
     res.on('finish', () => {
         try {
-            // Clean up files and directories
             if (fs.existsSync(filePath)) {
                 fs.unlinkSync(filePath);
             }
@@ -336,9 +335,7 @@ app.get('/api/download/file/:jobId', (req, res) => {
     });
 });
 
-// ──────────────────────────────────────────────
-//  Startup health check
-// ──────────────────────────────────────────────
+// Startup health check
 async function checkDependencies() {
     const ytDlpPath = getYtDlpPath();
     const ffmpegPath = getFfmpegPath();
@@ -354,13 +351,13 @@ async function checkDependencies() {
             child.on('error', reject);
             child.on('close', (code) => {
                 if (code === 0) resolve(out.trim());
-                else reject(new Error(`exit code ${code}`));
+                else reject(new Error('exit code ' + code));
             });
         });
-        console.log(`[startup] yt-dlp OK — ${ytDlpPath} (v${ytOut})`);
+        console.log('[startup] yt-dlp OK - ' + ytDlpPath + ' (v' + ytOut + ')');
         ytDlpOk = true;
     } catch (err) {
-        console.error(`[startup] FAILED — yt-dlp not found at "${ytDlpPath}". ${err.message}`);
+        console.error('[startup] FAILED - yt-dlp not found at "' + ytDlpPath + '". ' + err.message);
         console.error('[startup] Download yt-dlp and set YTDLP_PATH, or run ./build.sh');
     }
 
@@ -372,22 +369,30 @@ async function checkDependencies() {
             child.on('error', reject);
             child.on('close', (code) => {
                 if (code === 0) resolve(out.split('\n')[0]);
-                else reject(new Error(`exit code ${code}`));
+                else reject(new Error('exit code ' + code));
             });
         });
-        console.log(`[startup] ffmpeg OK — ${ffOut}`);
+        console.log('[startup] ffmpeg OK - ' + ffOut);
         ffmpegOk = true;
     } catch (err) {
-        console.error(`[startup] FAILED — ffmpeg not found at "${ffmpegPath}". ${err.message}`);
+        console.error('[startup] FAILED - ffmpeg not found at "' + ffmpegPath + '". ' + err.message);
         console.error('[startup] Install ffmpeg and set FFMPEG_PATH, or run ./build.sh');
     }
 
     if (!ytDlpOk || !ffmpegOk) {
         console.warn('[startup] WARNING: One or more dependencies are missing. Downloads will fail until this is resolved.');
     }
+
+    const cookiesPath = getCookiesPath();
+    if (cookiesPath) {
+        console.log('[startup] Cookies file found at "' + cookiesPath + '" - using authenticated requests');
+    } else {
+        console.warn('[startup] No cookies file found - some videos may show "login required" errors');
+        console.warn('[startup] Export YouTube cookies as cookies.txt and set YTDLP_COOKIES_PATH or place at /etc/secrets/cookies.txt');
+    }
 }
 
 app.listen(PORT, async() => {
-    console.log(`yt-dlp downloader running at http://localhost:${PORT}`);
+    console.log('yt-dlp downloader running at http://localhost:' + PORT);
     await checkDependencies();
 });

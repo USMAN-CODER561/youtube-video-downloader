@@ -1,5 +1,5 @@
 const { spawn } = require('child_process');
-const { getYtDlpPath } = require('./ytDlp');
+const { getYtDlpPath, getCookiesArgs } = require('./ytDlp');
 
 function runProcessStreaming({ command, args, onStdoutLine, onStderrLine }) {
     return new Promise((resolve, reject) => {
@@ -36,6 +36,7 @@ function buildArgsForProgress({ url, formatId, outPattern, isMp3Choice, ffmpegPa
         '--progress',
         '--progress-template',
         '%(progress)j',
+        ...getCookiesArgs(),
     ];
 
     if (isMp3Choice) {
