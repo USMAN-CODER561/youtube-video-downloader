@@ -3,18 +3,44 @@ const fs = require('fs');
 const path = require('path');
 
 /**
- * Returns the path to the yt-dlp binary, using YTDLP_PATH env var if set,
- * otherwise falling back to 'yt-dlp' (assumes it's on PATH or in ./bin/).
+ * Returns the absolute path to the yt-dlp binary.
+ * Priority: YTDLP_PATH env var → ./bin/yt-dlp (project-local) → 'yt-dlp' (PATH)
  */
 function getYtDlpPath() {
     const envPath = process.env.YTDLP_PATH ? String(process.env.YTDLP_PATH).trim() : '';
-    if (envPath) return envPath;
-    // On Render, the build.sh installs it to ./bin/yt-dlp
-    const localBin = require('path').join(__dirname, '..', 'bin', 'yt-dlp');
+    if (envPath) {
+        // Resolve relative paths from the project root (__dirname/..)
+        if (!path.isAbsolute(envPath)) {
+            return path.resolve(__dirname, '..', envPath);
+        }
+        return path.resolve(envPath);
+    }
+    // Fallback: check project-local bin directory
+    const localBin = path.join(__dirname, '..', 'bin', 'yt-dlp');
     try {
-        if (require('fs').existsSync(localBin)) return localBin;
+        if (fs.existsSync(localBin)) return localBin;
     } catch {}
     return 'yt-dlp';
+}
+
+/**
+ * Returns the absolute path to the ffmpeg binary.
+ * Priority: FFMPEG_PATH env var → ./bin/ffmpeg (project-local) → 'ffmpeg' (PATH)
+ */
+function getFfmpegPath() {
+    const envPath = process.env.FFMPEG_PATH ? String(process.env.FFMPEG_PATH).trim() : '';
+    if (envPath) {
+        if (!path.isAbsolute(envPath)) {
+            return path.resolve(__dirname, '..', envPath);
+        }
+        return path.resolve(envPath);
+    }
+    // Fallback: check project-local bin directory
+    const localBin = path.join(__dirname, '..', 'bin', 'ffmpeg');
+    try {
+        if (fs.existsSync(localBin)) return localBin;
+    } catch {}
+    return 'ffmpeg';
 }
 
 function runProcess({ command, args, onStdoutLine, onStderrLine, timeoutMs = 0 }) {
@@ -374,6 +400,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
 
 module.exports = {
     getYtDlpPath,
+    getFfmpegPath,
     runDumpJson,
     runDownloadToFile,
     parseDumpJsonToInfo,

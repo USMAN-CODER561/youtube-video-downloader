@@ -5,7 +5,7 @@ services:
     region: oregon
     plan: free
 
-    buildCommand: ./build.sh
+    buildCommand: chmod +x build.sh && ./build.sh
     startCommand: npm start
 
     envVars:
@@ -14,9 +14,9 @@ services:
       - key: PORT
         value: 3000
       - key: YTDLP_PATH
-        value: ./bin/yt-dlp
+        value: /opt/render/project/src/bin/yt-dlp
       - key: FFMPEG_PATH
-        value: /usr/bin/ffmpeg
+        value: ./bin/ffmpeg
       - key: NODE_ENV
         value: production
 

@@ -7,7 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 
-const { getYtDlpPath, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
+const { getYtDlpPath, getFfmpegPath, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
 const { runDownloadWithProgress } = require('./ytDlpProgress');
 const progressStore = require('./progressStore');
 const downloadFilesStore = require('./downloadFilesStore');
@@ -238,7 +238,7 @@ app.post('/api/download', async(req, res) => {
                 url,
                 formatId: format_id,
                 outPattern,
-                ffmpegPath: process.env.FFMPEG_PATH || '',
+                ffmpegPath: getFfmpegPath(),
                 onProgress: (p) => {
                     // Ensure we always update something so the UI progress bar moves.
                     const normalized = {
@@ -341,7 +341,7 @@ app.get('/api/download/file/:jobId', (req, res) => {
 // ──────────────────────────────────────────────
 async function checkDependencies() {
     const ytDlpPath = getYtDlpPath();
-    const ffmpegPath = process.env.FFMPEG_PATH || 'ffmpeg';
+    const ffmpegPath = getFfmpegPath();
 
     let ytDlpOk = false;
     let ffmpegOk = false;
