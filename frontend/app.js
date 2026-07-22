@@ -413,6 +413,61 @@ downloadBtn.addEventListener('click', async() => {
     }
 });
 
+// --- Service Worker Registration ---
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').then((reg) => {
+            console.log('[SW] Registered successfully, scope:', reg.scope);
+        }, (err) => {
+            console.warn('[SW] Registration failed:', err);
+        });
+    });
+} else {
+    console.log('[SW] Service workers not supported in this browser');
+}
+
+// --- Install App (PWA) Button ---
+const installBtn = document.getElementById('installBtn');
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // Prevent the automatic mini-infobar on Android Chrome
+    e.preventDefault();
+    // Store the event so we can trigger it later
+    deferredPrompt = e;
+    // Show the install button
+    if (installBtn) {
+        installBtn.classList.remove('hidden');
+    }
+    console.log('[PWA] beforeinstallprompt fired — install button shown');
+});
+
+window.addEventListener('appinstalled', () => {
+    // The app was installed — hide the button
+    if (installBtn) {
+        installBtn.classList.add('hidden');
+    }
+    deferredPrompt = null;
+    console.log('[PWA] App was installed');
+});
+
+if (installBtn) {
+    installBtn.addEventListener('click', async() => {
+        if (!deferredPrompt) {
+            console.log('[PWA] No install prompt available (likely already installed or unsupported)');
+            return;
+        }
+        // Show the browser's install prompt
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        console.log('[PWA] User choice:', result.outcome);
+        // Reset — prompt can only be used once
+        deferredPrompt = null;
+        // Hide button after install (or dismissal)
+        installBtn.classList.add('hidden');
+    });
+}
+
 // --- Cookie status indicator ---
 const cookieDot = document.getElementById('cookieDot');
 const cookieLabel = document.getElementById('cookieLabel');
