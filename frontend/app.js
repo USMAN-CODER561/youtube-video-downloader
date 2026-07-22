@@ -413,5 +413,35 @@ downloadBtn.addEventListener('click', async() => {
     }
 });
 
+// --- Cookie status indicator ---
+const cookieDot = document.getElementById('cookieDot');
+const cookieLabel = document.getElementById('cookieLabel');
+
+async function updateCookieStatus() {
+    try {
+        const res = await fetch('/api/cookie-status');
+        const data = await res.json();
+        if (!data || typeof data.ok !== 'boolean') throw new Error('invalid response');
+
+        if (data.ok) {
+            cookieDot.className = 'cookieDot ok';
+            cookieLabel.textContent = 'Cookies: OK';
+        } else {
+            cookieDot.className = 'cookieDot err';
+            cookieLabel.textContent = 'Cookies: Expired';
+        }
+    } catch (e) {
+        cookieDot.className = 'cookieDot err';
+        cookieLabel.textContent = 'Cookies: Error';
+    }
+}
+
+// Initial check on page load
+cookieDot.className = 'cookieDot checking';
+cookieLabel.textContent = 'Cookies: checking…';
+updateCookieStatus();
+// Re-check every 5 minutes (300000ms) to catch expiration
+setInterval(updateCookieStatus, 300000);
+
 initHistory();
 renderHistory();

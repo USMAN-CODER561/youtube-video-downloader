@@ -410,6 +410,65 @@
                                                                                                                             color: var(--muted);
                                                                                                                             font-size: 12px;
                                                                                                                         }
+                                                                                                                        /* Cookie status indicator — tiny, unobtrusive, bottom-left */
+                                                                                                                        
+                                                                                                                        .cookieStatus {
+                                                                                                                            position: fixed;
+                                                                                                                            bottom: 8px;
+                                                                                                                            left: 10px;
+                                                                                                                            display: flex;
+                                                                                                                            align-items: center;
+                                                                                                                            gap: 5px;
+                                                                                                                            font-size: 10px;
+                                                                                                                            color: var(--muted);
+                                                                                                                            opacity: 0.4;
+                                                                                                                            transition: opacity .2s ease;
+                                                                                                                            z-index: 999;
+                                                                                                                            pointer-events: none;
+                                                                                                                            user-select: none;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .cookieStatus:hover {
+                                                                                                                            opacity: 1;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .cookieDot {
+                                                                                                                            width: 7px;
+                                                                                                                            height: 7px;
+                                                                                                                            border-radius: 50%;
+                                                                                                                            display: inline-block;
+                                                                                                                            flex-shrink: 0;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .cookieDot.ok {
+                                                                                                                            background: #4caf50;
+                                                                                                                            box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .cookieDot.err {
+                                                                                                                            background: #ff6a7a;
+                                                                                                                            box-shadow: 0 0 4px rgba(255, 106, 122, 0.5);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .cookieDot.checking {
+                                                                                                                            background: #ffc107;
+                                                                                                                            box-shadow: 0 0 4px rgba(255, 193, 7, 0.5);
+                                                                                                                            animation: pulse 1s ease-in-out infinite;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        @keyframes pulse {
+                                                                                                                            0%,
+                                                                                                                            100% {
+                                                                                                                                opacity: 1;
+                                                                                                                            }
+                                                                                                                            50% {
+                                                                                                                                opacity: 0.3;
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .cookieLabel {
+                                                                                                                            font-size: 9px;
+                                                                                                                        }
                                                                                                                         
                                                                                                                         @media (max-width: 860px) {
                                                                                                                             .mainGrid {

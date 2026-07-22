@@ -130,14 +130,17 @@ function toUserFriendlyYtDlpError(stderrOrErrText) {
 
     const has = (s) => txt.includes(s);
 
+    // Cookie/bot detection — distinct from other errors
+    if (has('sign in to confirm') || has('sign in') || has('login') || has('bot') || has('cookie')) {
+        // This is a service-level authentication issue, not a user error
+        return 'This service is temporarily unavailable for downloads, please try again later.';
+    }
+
     if (has('private video') || has('this video is private') || has('private')) {
         return 'This video is private or restricted.';
     }
     if (has('age-restricted') || has('age restricted') || has('13+')) {
         return 'This video appears to be age-restricted.';
-    }
-    if (has('sign in') || has('login')) {
-        return 'This video requires login.';
     }
     if (has('unavailable') || has('video unavailable')) {
         return 'This video is unavailable.';
@@ -157,6 +160,54 @@ function toUserFriendlyYtDlpError(stderrOrErrText) {
 }
 
 app.get('/healthz', (_req, res) => res.json({ ok: true }));
+
+// Known small public YouTube video ID used for cookie health checks
+const COOKIE_TEST_VIDEO_ID = 'dQw4w9WgXcQ'; // Rick Astley - Never Gonna Give You Up (public, short)
+let lastCookieValidationTimestamp = null;
+let cookieValidationResult = null; // { ok: boolean, checkedAt: ISO string }
+
+/**
+ * Run a lightweight yt-dlp test against a known public video to check if cookies are valid.
+ * Returns { ok, checkedAt, message }.
+ */
+async function checkCookieHealth() {
+    const testUrl = `https://www.youtube.com/watch?v=${COOKIE_TEST_VIDEO_ID}`;
+    const checkedAt = new Date().toISOString();
+    try {
+        const raw = await runDumpJson(testUrl);
+        // If we got JSON back without sign-in error, cookies are valid
+        cookieValidationResult = { ok: true, checkedAt };
+        return cookieValidationResult;
+    } catch (err) {
+        const stderr = (err && err.stderr) || '';
+        const txt = String(stderr).toLowerCase();
+        // Check for known cookie/sign-in/bot indicators
+        if (txt.includes('sign in') || txt.includes('login') || txt.includes('bot') || txt.includes('cookie')) {
+            cookieValidationResult = { ok: false, checkedAt, message: 'Cookies expired or invalid — re-export and update Secret Files' };
+        } else {
+            // Some other error (network, video taken down, etc.) — not necessarily a cookie issue
+            cookieValidationResult = { ok: false, checkedAt, message: 'Cookie check failed with unexpected error: ' + (err.message || stderr).slice(0, 200) };
+        }
+        return cookieValidationResult;
+    }
+}
+
+/**
+ * GET /api/cookie-status
+ * Lightweight admin endpoint — calls checkCookieHealth() and returns the result.
+ * The result is cached briefly (last result reused if < 60s old) to avoid hammering YouTube.
+ */
+app.get('/api/cookie-status', async(_req, res) => {
+    // Reuse cached result if checked within the last 60 seconds
+    if (cookieValidationResult && cookieValidationResult.checkedAt) {
+        const ageMs = Date.now() - new Date(cookieValidationResult.checkedAt).getTime();
+        if (ageMs < 60000) {
+            return res.json(cookieValidationResult);
+        }
+    }
+    const result = await checkCookieHealth();
+    return res.json(result);
+});
 
 app.post('/api/info', async(req, res) => {
     try {
@@ -433,4 +484,15 @@ async function checkDependencies() {
 app.listen(PORT, async() => {
     console.log('yt-dlp downloader running at http://localhost:' + PORT);
     await checkDependencies();
+    // Initial cookie validation test — logs result so we can track cookie lifetime
+    try {
+        const health = await checkCookieHealth();
+        if (health.ok) {
+            console.log('[startup][cookies] Cookies VALID at ' + health.checkedAt + ' — testing video ' + COOKIE_TEST_VIDEO_ID);
+        } else {
+            console.warn('[startup][cookies] Cookies INVALID at ' + health.checkedAt + ' — ' + (health.message || 'unknown error'));
+        }
+    } catch (e) {
+        console.warn('[startup][cookies] Cookie health check threw:', e.message);
+    }
 });
