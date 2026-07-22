@@ -88,7 +88,7 @@ function getDenoPath() {
 function getJsRuntimeArgs() {
     const denoPath = getDenoPath();
     if (denoPath) {
-        return ['--js-runtimes', denoPath];
+        return ['--js-runtimes', `deno:${denoPath}`];
     }
     return [];
 }
