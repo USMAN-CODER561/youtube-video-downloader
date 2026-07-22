@@ -186,9 +186,12 @@ async function fetchInfo(url) {
     return data.video;
 }
 
-urlForm.addEventListener('submit', async(e) => {
-    console.log('[frontend][urlForm][submit] handler called');
-    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+/**
+ * Shared handler for fetching video info — called BOTH on form submit (Enter key)
+ * AND on fetchBtn click. A single code path ensures consistent behavior.
+ */
+async function handleFetchVideo() {
+    console.log('[frontend][handleFetchVideo] called at', new Date().toISOString());
 
     const url = urlInput.value.trim();
 
@@ -252,6 +255,19 @@ urlForm.addEventListener('submit', async(e) => {
         fetchBtn.disabled = false;
         urlInput.disabled = false;
     }
+}
+
+// Form submit handler — fires when Enter is pressed in the URL input
+urlForm.addEventListener('submit', async(e) => {
+    console.log('[frontend][urlForm][submit] triggered at', new Date().toISOString());
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    await handleFetchVideo();
+});
+
+// Fetch button click handler — fires when button is clicked
+fetchBtn.addEventListener('click', async() => {
+    console.log('[frontend][fetchBtn][click] triggered at', new Date().toISOString());
+    await handleFetchVideo();
 });
 
 downloadBtn.addEventListener('click', async() => {
