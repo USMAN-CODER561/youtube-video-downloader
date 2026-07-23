@@ -37,7 +37,7 @@ fi
 # ──────────────────────────────────────────────
 #  2) Download yt-dlp binary
 # ──────────────────────────────────────────────
-YTDLP_URL="https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp"
+YTDLP_URL="https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux"
 
 echo "[build] Downloading yt-dlp from GitHub..."
 if curl -sL "$YTDLP_URL" -o bin/yt-dlp; then

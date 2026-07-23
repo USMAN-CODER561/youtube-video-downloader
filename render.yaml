@@ -14,7 +14,7 @@ services:
       - key: PORT
         value: 3000
       - key: YTDLP_PATH
-        value: /opt/render/project/src/bin/yt-dlp
+        value: yt-dlp
       - key: FFMPEG_PATH
         value: ./bin/ffmpeg
       - key: NODE_ENV
