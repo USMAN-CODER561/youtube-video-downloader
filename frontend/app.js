@@ -500,17 +500,30 @@ if (feedbackForm) {
 })();
 
 async function fetchInfo(url) {
-    const res = await fetch('/api/info', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url })
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.ok) {
-        throw new Error(data.error || 'Failed to fetch video info');
+    try {
+        const res = await fetch('/api/info', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url }),
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+            throw new Error(data.error || 'Failed to fetch video info');
+        }
+        return data.video;
+    } catch (err) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+            throw new Error('Request timed out, YouTube is taking too long to respond.');
+        }
+        throw err;
     }
-    return data.video;
 }
 
 /**
@@ -631,12 +644,26 @@ downloadBtn.addEventListener('click', async() => {
     if (progressSubText) progressSubText.textContent = 'Preparing…';
 
     try {
-        // 1) Start download job (backend returns jobId immediately)
-        const startRes = await fetch('/api/download', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, format_id })
-        });
+        // 1) Start download job (backend returns jobId immediately) — with 15s timeout
+        const downloadController = new AbortController();
+        const downloadTimeoutId = setTimeout(() => downloadController.abort(), 15000);
+
+        let startRes;
+        try {
+            startRes = await fetch('/api/download', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, format_id }),
+                signal: downloadController.signal
+            });
+        } catch (err) {
+            clearTimeout(downloadTimeoutId);
+            if (err.name === 'AbortError') {
+                throw new Error('Request timed out, YouTube is taking too long to respond.');
+            }
+            throw err;
+        }
+        clearTimeout(downloadTimeoutId);
 
         const startData = await startRes.json().catch(() => ({}));
         if (!startRes.ok || !startData.ok || !startData.jobId) {

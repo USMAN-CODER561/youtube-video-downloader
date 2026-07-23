@@ -431,12 +431,13 @@ async function runDumpJson(url) {
         '--retries', '3',
         '--fragment-retries', '3',
         '--no-continue',
+        '--socket-timeout', '10',
         '--user-agent', process.env.YTDLP_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36',
         ...getCookiesArgs(),
         ...jsArgs,
         validated,
     ];
-    const { stdout, stderr } = await runProcess({ command: ytDlpCmd, args });
+    const { stdout, stderr } = await runProcess({ command: ytDlpCmd, args, timeoutMs: 15000 });
 
     if (!stdout || !String(stdout).trim().startsWith('{')) {
         const err = new Error('yt-dlp did not return JSON');
@@ -477,6 +478,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
         '--retries', '3',
         '--fragment-retries', '3',
         '--no-continue',
+        '--socket-timeout', '10',
         '--user-agent', process.env.YTDLP_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36',
         '--accept-language', process.env.YTDLP_ACCEPT_LANGUAGE || 'en-US,en;q=0.9',
         ...getCookiesArgs(),

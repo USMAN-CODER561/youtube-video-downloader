@@ -44,6 +44,7 @@ function buildArgsForProgress({ url, formatId, outPattern, isMp3Choice, ffmpegPa
         '--progress',
         '--progress-template',
         '%(progress)j',
+        '--socket-timeout', '10',
         ...getCookiesArgs(),
         ...getJsRuntimeArgs(),
     ];

@@ -210,19 +210,35 @@ app.get('/api/cookie-status', async(_req, res) => {
 });
 
 app.post('/api/info', async(req, res) => {
+    // Enforce a hard 15-second ceiling for the entire info request
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+    }, 15000);
+
     try {
         const body = req.body || {};
         const url = typeof body.url === 'string' ? body.url.trim() : '';
 
         if (!url || !isYouTubeUrl(url)) {
+            clearTimeout(timeoutId);
             return res.status(400).json({ ok: false, error: 'Invalid URL. Paste a valid YouTube URL (youtube.com or youtu.be).' });
         }
 
         const raw = await runDumpJson(url);
         const parsed = parseDumpJsonToInfo(raw);
 
+        clearTimeout(timeoutId);
         return res.json({ ok: true, video: parsed });
     } catch (err) {
+        clearTimeout(timeoutId);
+
+        // Detect abort/timeout signals
+        if (controller.signal.aborted || (err && (err.code === 'ETIMEDOUT' || err.message === 'yt-dlp timed out' || err.toString().includes('timed out') || err.toString().includes('AbortError')))) {
+            console.error('[yt-dlp][api/info][timeout] Request timed out after 15s for url:', req.body && req.body.url);
+            return res.status(504).json({ ok: false, error: 'Request timed out, YouTube is taking too long to respond.' });
+        }
+
         console.error('[yt-dlp][api/info][raw-stderr]', err && (err.stderr || err.message || err));
         const friendly = toUserFriendlyYtDlpError(err && (err.stderr || err.message || err));
         const statusCode = err && err.statusCode ? err.statusCode : 500;
