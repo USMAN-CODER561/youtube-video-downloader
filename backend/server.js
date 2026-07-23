@@ -7,7 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 
-const { getYtDlpPath, getFfmpegPath, getCookiesPath, getSourceCookiesPath, getDenoPath, initCookiesCopy, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
+const { getYtDlpPath, getFfmpegPath, getCookiesPath, getSourceCookiesPath, getDenoPath, initCookiesCopy, setCookiesEnabled, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
 const { runDownloadWithProgress } = require('./ytDlpProgress');
 const progressStore = require('./progressStore');
 const downloadFilesStore = require('./downloadFilesStore');
@@ -168,26 +168,79 @@ let cookieValidationResult = null; // { ok: boolean, checkedAt: ISO string }
 
 /**
  * Run a lightweight yt-dlp test against a known public video to check if cookies are valid.
+ * Uses --socket-timeout 10 and --extractor-args youtube:player_client=tv,ios for fast results.
+ * If cookies are missing or the check fails, cookies are disabled server-wide.
+ * The server always continues running regardless of cookie status.
  * Returns { ok, checkedAt, message }.
  */
 async function checkCookieHealth() {
     const testUrl = `https://www.youtube.com/watch?v=${COOKIE_TEST_VIDEO_ID}`;
     const checkedAt = new Date().toISOString();
     try {
-        const raw = await runDumpJson(testUrl);
+        // Spawn yt-dlp directly with TV/iOS extractor + socket timeout
+        const ytDlpCmd = getYtDlpPath();
+        const cookiesPath = getCookiesPath();
+        const args = [
+            '--dump-json',
+            '--no-playlist',
+            '--socket-timeout', '10',
+            '--extractor-args', 'youtube:player_client=tv,ios',
+            '--no-warnings',
+        ];
+
+        // Include --cookies only if a cookies file exists
+        if (cookiesPath) {
+            args.push('--cookies', cookiesPath);
+        } else {
+            // No cookies file at all - disable cookies silently
+            setCookiesEnabled(false);
+            cookieValidationResult = { ok: false, checkedAt, message: 'No cookies file found - using TV/iOS clients' };
+            console.log('[startup][cookies] No cookies file found - cookies disabled, falling back to TV/iOS clients');
+            return cookieValidationResult;
+        }
+        args.push(testUrl);
+
+        const { stdout } = await new Promise((resolve, reject) => {
+            const child = spawn(ytDlpCmd, args, { windowsHide: true });
+            let stdout = '';
+            let stderr = '';
+            child.stdout.on('data', (chunk) => { stdout += chunk.toString('utf8'); });
+            child.stderr.on('data', (chunk) => { stderr += chunk.toString('utf8'); });
+            const timeout = setTimeout(() => {
+                try { child.kill('SIGKILL'); } catch {}
+                const err = new Error('yt-dlp timed out');
+                err.stderr = stderr;
+                reject(err);
+            }, 15000);
+            child.on('error', (err) => { clearTimeout(timeout);
+                reject(err); });
+            child.on('close', (code) => {
+                clearTimeout(timeout);
+                if (code === 0) resolve({ stdout, stderr });
+                else {
+                    const err = new Error(`yt-dlp exited with code ${code}`);
+                    err.stderr = stderr;
+                    err.stdout = stdout;
+                    reject(err);
+                }
+            });
+        });
+
         // If we got JSON back without sign-in error, cookies are valid
-        cookieValidationResult = { ok: true, checkedAt };
+        if (stdout && String(stdout).trim().startsWith('{')) {
+            cookieValidationResult = { ok: true, checkedAt };
+            return cookieValidationResult;
+        }
+
+        // Non-JSON output means something went wrong even with cookies
+        setCookiesEnabled(false);
+        cookieValidationResult = { ok: false, checkedAt, message: 'Cookie test returned non-JSON output - disabling cookies' };
         return cookieValidationResult;
     } catch (err) {
-        const stderr = (err && err.stderr) || '';
-        const txt = String(stderr).toLowerCase();
-        // Check for known cookie/sign-in/bot indicators
-        if (txt.includes('sign in') || txt.includes('login') || txt.includes('bot') || txt.includes('cookie')) {
-            cookieValidationResult = { ok: false, checkedAt, message: 'Cookies expired or invalid — re-export and update Secret Files' };
-        } else {
-            // Some other error (network, video taken down, etc.) — not necessarily a cookie issue
-            cookieValidationResult = { ok: false, checkedAt, message: 'Cookie check failed with unexpected error: ' + (err.message || stderr).slice(0, 200) };
-        }
+        // Cookies failed - disable them and continue running
+        setCookiesEnabled(false);
+        cookieValidationResult = { ok: false, checkedAt, message: 'Cookie validation failed - cookies disabled, falling back to TV/iOS clients' };
+        console.warn('[startup][cookies] Cookie check failed:', (err.message || err.stderr || '').slice(0, 200));
         return cookieValidationResult;
     }
 }
@@ -527,14 +580,18 @@ app.listen(PORT, async() => {
     console.log('yt-dlp downloader running at http://localhost:' + PORT);
     await checkDependencies();
     // Initial cookie validation test — logs result so we can track cookie lifetime
+    // Does NOT crash the server if cookies fail — server continues with TV/iOS fallback.
     try {
         const health = await checkCookieHealth();
         if (health.ok) {
-            console.log('[startup][cookies] Cookies VALID at ' + health.checkedAt + ' — testing video ' + COOKIE_TEST_VIDEO_ID);
+            console.log('[startup][cookies] Cookies VALID at ' + health.checkedAt + ' - testing video ' + COOKIE_TEST_VIDEO_ID);
         } else {
-            console.warn('[startup][cookies] Cookies INVALID at ' + health.checkedAt + ' — ' + (health.message || 'unknown error'));
+            console.warn('[startup][cookies] Cookies INVALID at ' + health.checkedAt + ' - ' + (health.message || 'unknown error'));
+            console.warn('[startup][cookies] Warning: Cookies disabled, falling back to TV/iOS clients');
         }
     } catch (e) {
+        // Safety net — checkCookieHealth now handles all errors internally
         console.warn('[startup][cookies] Cookie health check threw:', e.message);
+        console.warn('[startup][cookies] Warning: Cookies disabled, falling back to TV/iOS clients');
     }
 });
