@@ -1,7 +1,7 @@
 const { spawn } = require('child_process');
 const { getYtDlpPath, getCookiesArgs, getJsRuntimeArgs } = require('./ytDlp');
 
-function runProcessStreaming({ command, args, onStdoutLine, onStderrLine }) {
+function runProcessStreaming({ command, args, onStdoutLine, onStderrLine, timeoutMs = 10000 }) {
     return new Promise((resolve, reject) => {
         const child = spawn(command, args, { windowsHide: true });
 
@@ -26,9 +26,24 @@ function runProcessStreaming({ command, args, onStdoutLine, onStderrLine }) {
             });
         }
 
-        child.on('error', reject);
+        let timeout;
+        if (timeoutMs > 0) {
+            timeout = setTimeout(() => {
+                try { child.kill('SIGKILL'); } catch {}
+                const err = new Error('yt-dlp timed out');
+                err.statusCode = 504;
+                err.stderr = stderrAccumulated;
+                reject(err);
+            }, timeoutMs);
+        }
+
+        child.on('error', (err) => {
+            if (timeout) clearTimeout(timeout);
+            reject(err);
+        });
 
         child.on('close', (code) => {
+            if (timeout) clearTimeout(timeout);
             if (code === 0) return resolve({ code });
             console.error('[yt-dlp][raw-stderr]', stderrAccumulated);
             const err = new Error(`yt-dlp exited with code ${code}`);
@@ -44,7 +59,9 @@ function buildArgsForProgress({ url, formatId, outPattern, isMp3Choice, ffmpegPa
         '--progress',
         '--progress-template',
         '%(progress)j',
-        '--socket-timeout', '10',
+        '--socket-timeout', '5',
+        '--extractor-args', 'youtube:player_client=tv,ios',
+        '--no-warnings',
         ...getCookiesArgs(),
         ...getJsRuntimeArgs(),
     ];
