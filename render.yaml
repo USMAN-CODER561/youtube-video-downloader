@@ -17,6 +17,8 @@ services:
         value: yt-dlp
       - key: FFMPEG_PATH
         value: ./bin/ffmpeg
+      - key: YTDLP_COOKIES_PATH
+        value: ./cookies.txt
       - key: NODE_ENV
         value: production
 

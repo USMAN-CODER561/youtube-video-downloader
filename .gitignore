@@ -2,3 +2,7 @@ node_modules/
 .env
 downloads/
 # Do NOT ignore bin/ — it's created by build.sh and needed at runtime on Render
+
+# Ignore cookies files (sensitive credentials—never commit real cookies!)
+cookies.txt
+/etc/secrets/cookies.txt

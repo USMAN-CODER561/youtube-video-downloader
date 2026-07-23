@@ -95,17 +95,41 @@ function getJsRuntimeArgs() {
 
 /**
  * Returns the path to the SOURCE read-only cookies.txt file
- * (the Render Secret File or user-provided path).
+ * Checks in order of priority:
+ *   1. YTDLP_COOKIES_PATH env var
+ *   2. ./cookies.txt (project root — used for local dev / Railway)
+ *   3. /app/cookies.txt (Railway working directory / common Linux deploy)
+ *   4. /etc/secrets/cookies.txt (Render Secret Files)
  */
 function getSourceCookiesPath() {
+    // 1) Explicit env var (highest priority)
     const envPath = process.env.YTDLP_COOKIES_PATH ?
         String(process.env.YTDLP_COOKIES_PATH).trim() :
-        '/etc/secrets/cookies.txt';
+        '';
+    if (envPath) {
+        try {
+            if (fs.existsSync(envPath)) return path.resolve(envPath);
+        } catch {}
+    }
+
+    // 2) Project-local ./cookies.txt
+    const localPath = path.resolve(__dirname, '..', 'cookies.txt');
     try {
-        if (fs.existsSync(envPath)) {
-            return path.resolve(envPath);
-        }
+        if (fs.existsSync(localPath)) return localPath;
     } catch {}
+
+    // 3) /app/cookies.txt (typical Railway working directory)
+    const railwayPath = '/app/cookies.txt';
+    try {
+        if (fs.existsSync(railwayPath)) return railwayPath;
+    } catch {}
+
+    // 4) /etc/secrets/cookies.txt (Render Secret Files, backward compatible)
+    const renderPath = '/etc/secrets/cookies.txt';
+    try {
+        if (fs.existsSync(renderPath)) return renderPath;
+    } catch {}
+
     return null;
 }
 
@@ -472,8 +496,6 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
             validated,
         ];
     } else {
-        const bestVideoAudioMp4 = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best[ext=mp4]';
-        // (If that selector is too strict, yt-dlp will still try fallbacks with the next entries)
         args = [
             '-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
             '--no-playlist',
@@ -481,6 +503,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
             '--newline',
             '--merge-output-format', 'mp4',
             ...(ffmpegPath ? ['--ffmpeg-location', ffmpegPath] : []),
+            ...common,
             validated,
         ];
     }
