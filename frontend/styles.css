@@ -520,3 +520,601 @@
                                                                                                                                 aspect-ratio: 16/9;
                                                                                                                             }
                                                                                                                         }
+                                                                                                                        /* ============================================================
+                                                        1. HOW IT WORKS
+                                                           ============================================================ */
+                                                                                                                        
+                                                                                                                        .sectionHowItWorks {
+                                                                                                                            margin-top: 24px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .sectionTitle {
+                                                                                                                            margin: 0 0 16px;
+                                                                                                                            font-size: 20px;
+                                                                                                                            font-weight: 900;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .stepsGrid {
+                                                                                                                            display: grid;
+                                                                                                                            grid-template-columns: repeat(3, 1fr);
+                                                                                                                            gap: 14px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .stepCard {
+                                                                                                                            background: rgba(255, 255, 255, .04);
+                                                                                                                            border: 1px solid var(--border);
+                                                                                                                            border-radius: 16px;
+                                                                                                                            padding: 20px 14px;
+                                                                                                                            text-align: center;
+                                                                                                                            backdrop-filter: blur(12px);
+                                                                                                                            -webkit-backdrop-filter: blur(12px);
+                                                                                                                            box-shadow: 0 18px 60px rgba(0, 0, 0, .30);
+                                                                                                                            opacity: 0;
+                                                                                                                            transform: translateY(16px);
+                                                                                                                            transition: opacity .5s ease, transform .5s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .stepCard.visible {
+                                                                                                                            opacity: 1;
+                                                                                                                            transform: translateY(0);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .stepBadge {
+                                                                                                                            width: 30px;
+                                                                                                                            height: 30px;
+                                                                                                                            border-radius: 50%;
+                                                                                                                            background: linear-gradient(135deg, var(--accent), var(--accent2));
+                                                                                                                            color: #0a0520;
+                                                                                                                            font-weight: 900;
+                                                                                                                            font-size: 14px;
+                                                                                                                            display: inline-flex;
+                                                                                                                            align-items: center;
+                                                                                                                            justify-content: center;
+                                                                                                                            margin-bottom: 10px;
+                                                                                                                            box-shadow: 0 6px 20px rgba(124, 77, 255, .35);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .stepIcon {
+                                                                                                                            font-size: 28px;
+                                                                                                                            margin-bottom: 8px;
+                                                                                                                            line-height: 1;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .stepTitle {
+                                                                                                                            font-weight: 900;
+                                                                                                                            font-size: 15px;
+                                                                                                                            margin-bottom: 6px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .stepDesc {
+                                                                                                                            color: var(--muted);
+                                                                                                                            font-size: 13px;
+                                                                                                                            line-height: 1.4;
+                                                                                                                        }
+                                                                                                                        /* ============================================================
+                                                        2. FAQ
+                                                           ============================================================ */
+                                                                                                                        
+                                                                                                                        .sectionFaq {
+                                                                                                                            margin-top: 24px;
+                                                                                                                            padding-bottom: 18px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .faqList {
+                                                                                                                            display: flex;
+                                                                                                                            flex-direction: column;
+                                                                                                                            gap: 8px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .faqItem {
+                                                                                                                            background: rgba(255, 255, 255, .04);
+                                                                                                                            border: 1px solid var(--border);
+                                                                                                                            border-radius: 14px;
+                                                                                                                            overflow: hidden;
+                                                                                                                            backdrop-filter: blur(12px);
+                                                                                                                            -webkit-backdrop-filter: blur(12px);
+                                                                                                                            box-shadow: 0 8px 30px rgba(0, 0, 0, .20);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .faqQuestion {
+                                                                                                                            width: 100%;
+                                                                                                                            appearance: none;
+                                                                                                                            border: none;
+                                                                                                                            background: none;
+                                                                                                                            color: var(--text);
+                                                                                                                            font-weight: 800;
+                                                                                                                            font-size: 14px;
+                                                                                                                            padding: 14px 16px;
+                                                                                                                            display: flex;
+                                                                                                                            justify-content: space-between;
+                                                                                                                            align-items: center;
+                                                                                                                            gap: 10px;
+                                                                                                                            cursor: pointer;
+                                                                                                                            font-family: inherit;
+                                                                                                                            text-align: left;
+                                                                                                                            transition: background .15s ease;
+                                                                                                                            min-height: 44px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .faqQuestion:hover {
+                                                                                                                            background: rgba(255, 255, 255, .03);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .faqIcon {
+                                                                                                                            font-size: 18px;
+                                                                                                                            font-weight: 900;
+                                                                                                                            color: var(--accent2);
+                                                                                                                            flex-shrink: 0;
+                                                                                                                            transition: transform .25s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .faqQuestion[aria-expanded="true"] .faqIcon {
+                                                                                                                            transform: rotate(45deg);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .faqAnswer {
+                                                                                                                            max-height: 0;
+                                                                                                                            overflow: hidden;
+                                                                                                                            transition: max-height .3s ease, padding .3s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .faqAnswer>div {
+                                                                                                                            padding: 0 16px 14px;
+                                                                                                                            color: var(--muted);
+                                                                                                                            font-size: 13px;
+                                                                                                                            line-height: 1.5;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .faqQuestion[aria-expanded="true"]+.faqAnswer {
+                                                                                                                            max-height: 300px;
+                                                                                                                        }
+                                                                                                                        /* ============================================================
+                                                        3. SKELETON LOADING
+                                                           ============================================================ */
+                                                                                                                        
+                                                                                                                        .skeletonWrap {
+                                                                                                                            display: flex;
+                                                                                                                            gap: 14px;
+                                                                                                                            align-items: center;
+                                                                                                                            width: 100%;
+                                                                                                                            padding: 4px 0;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .skeletonRect {
+                                                                                                                            width: 170px;
+                                                                                                                            height: 96px;
+                                                                                                                            border-radius: 14px;
+                                                                                                                            background: rgba(255, 255, 255, .06);
+                                                                                                                            position: relative;
+                                                                                                                            overflow: hidden;
+                                                                                                                            flex-shrink: 0;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .skeletonBars {
+                                                                                                                            flex: 1;
+                                                                                                                            display: flex;
+                                                                                                                            flex-direction: column;
+                                                                                                                            gap: 10px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .skeletonBar {
+                                                                                                                            height: 14px;
+                                                                                                                            border-radius: 999px;
+                                                                                                                            background: rgba(255, 255, 255, .06);
+                                                                                                                            position: relative;
+                                                                                                                            overflow: hidden;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .skeletonBarWide {
+                                                                                                                            width: 80%;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .skeletonBarNarrow {
+                                                                                                                            width: 45%;
+                                                                                                                        }
+                                                                                                                        /* Shimmer animation */
+                                                                                                                        
+                                                                                                                        .skeletonRect::after,
+                                                                                                                        .skeletonBar::after {
+                                                                                                                            content: '';
+                                                                                                                            position: absolute;
+                                                                                                                            top: 0;
+                                                                                                                            left: -100%;
+                                                                                                                            width: 60%;
+                                                                                                                            height: 100%;
+                                                                                                                            background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, .06) 50%, transparent 100%);
+                                                                                                                            animation: shimmer 1.4s ease-in-out infinite;
+                                                                                                                            transform: skewX(-15deg);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        @keyframes shimmer {
+                                                                                                                            0% {
+                                                                                                                                left: -60%;
+                                                                                                                            }
+                                                                                                                            100% {
+                                                                                                                                left: 160%;
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                        /* Smooth transition skeleton -> real content */
+                                                                                                                        
+                                                                                                                        .preview {
+                                                                                                                            transition: opacity .3s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .preview.fadeInContent {
+                                                                                                                            animation: contentFadeIn .35s ease both;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        @keyframes contentFadeIn {
+                                                                                                                            from {
+                                                                                                                                opacity: 0;
+                                                                                                                                transform: translateY(6px);
+                                                                                                                            }
+                                                                                                                            to {
+                                                                                                                                opacity: 1;
+                                                                                                                                transform: translateY(0);
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                        /* ============================================================
+                                                        4. RECENT LINKS
+                                                           ============================================================ */
+                                                                                                                        
+                                                                                                                        .recentLinks {
+                                                                                                                            display: flex;
+                                                                                                                            flex-wrap: wrap;
+                                                                                                                            gap: 6px;
+                                                                                                                            margin-top: 10px;
+                                                                                                                            min-height: 0;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .recentPill {
+                                                                                                                            appearance: none;
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .10);
+                                                                                                                            background: rgba(255, 255, 255, .04);
+                                                                                                                            color: var(--muted);
+                                                                                                                            padding: 6px 12px;
+                                                                                                                            border-radius: 999px;
+                                                                                                                            cursor: pointer;
+                                                                                                                            font-size: 11px;
+                                                                                                                            font-weight: 700;
+                                                                                                                            transition: border-color .15s ease, background .15s ease, color .15s ease;
+                                                                                                                            white-space: nowrap;
+                                                                                                                            overflow: hidden;
+                                                                                                                            text-overflow: ellipsis;
+                                                                                                                            max-width: 200px;
+                                                                                                                            min-height: 32px;
+                                                                                                                            line-height: 1.2;
+                                                                                                                            font-family: inherit;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .recentPill:hover {
+                                                                                                                            border-color: rgba(124, 77, 255, .55);
+                                                                                                                            background: rgba(124, 77, 255, .10);
+                                                                                                                            color: var(--text);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .recentPill:active {
+                                                                                                                            transform: translateY(1px);
+                                                                                                                        }
+                                                                                                                        /* ============================================================
+                                                        5. COPY BUTTON + TOAST
+                                                           ============================================================ */
+                                                                                                                        
+                                                                                                                        .historyItem {
+                                                                                                                            position: relative;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .copyBtn {
+                                                                                                                            appearance: none;
+                                                                                                                            border: none;
+                                                                                                                            background: none;
+                                                                                                                            color: var(--muted);
+                                                                                                                            cursor: pointer;
+                                                                                                                            padding: 0;
+                                                                                                                            width: 32px;
+                                                                                                                            height: 32px;
+                                                                                                                            display: flex;
+                                                                                                                            align-items: center;
+                                                                                                                            justify-content: center;
+                                                                                                                            border-radius: 8px;
+                                                                                                                            flex-shrink: 0;
+                                                                                                                            transition: background .15s ease, color .15s ease;
+                                                                                                                            font-size: 16px;
+                                                                                                                            min-width: 44px;
+                                                                                                                            min-height: 44px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .copyBtn:hover {
+                                                                                                                            background: rgba(124, 77, 255, .12);
+                                                                                                                            color: var(--accent2);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .copyBtn .copyTooltip {
+                                                                                                                            position: absolute;
+                                                                                                                            bottom: calc(100% + 6px);
+                                                                                                                            left: 50%;
+                                                                                                                            transform: translateX(-50%);
+                                                                                                                            background: rgba(0, 0, 0, .85);
+                                                                                                                            color: #fff;
+                                                                                                                            font-size: 10px;
+                                                                                                                            padding: 4px 8px;
+                                                                                                                            border-radius: 6px;
+                                                                                                                            white-space: nowrap;
+                                                                                                                            opacity: 0;
+                                                                                                                            pointer-events: none;
+                                                                                                                            transition: opacity .15s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .copyBtn .copyTooltip.show {
+                                                                                                                            opacity: 1;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .toast {
+                                                                                                                            position: fixed;
+                                                                                                                            bottom: 40px;
+                                                                                                                            left: 50%;
+                                                                                                                            transform: translateX(-50%);
+                                                                                                                            background: rgba(0, 0, 0, .85);
+                                                                                                                            color: #fff;
+                                                                                                                            padding: 10px 20px;
+                                                                                                                            border-radius: 12px;
+                                                                                                                            font-size: 13px;
+                                                                                                                            font-weight: 700;
+                                                                                                                            z-index: 10000;
+                                                                                                                            backdrop-filter: blur(8px);
+                                                                                                                            -webkit-backdrop-filter: blur(8px);
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .10);
+                                                                                                                            transition: opacity .25s ease, transform .25s ease;
+                                                                                                                            pointer-events: none;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .toast.hidden {
+                                                                                                                            opacity: 0;
+                                                                                                                            transform: translateX(-50%) translateY(10px);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .toast:not(.hidden) {
+                                                                                                                            opacity: 1;
+                                                                                                                            transform: translateX(-50%) translateY(0);
+                                                                                                                        }
+                                                                                                                        /* ============================================================
+                                                        6. FEEDBACK / REPORT ISSUE
+                                                           ============================================================ */
+                                                                                                                        
+                                                                                                                        .siteFooter {
+                                                                                                                            margin-top: 24px;
+                                                                                                                            padding-bottom: 40px;
+                                                                                                                            text-align: center;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .reportBtn {
+                                                                                                                            appearance: none;
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .08);
+                                                                                                                            background: rgba(255, 255, 255, .03);
+                                                                                                                            color: var(--muted);
+                                                                                                                            padding: 10px 18px;
+                                                                                                                            border-radius: 12px;
+                                                                                                                            cursor: pointer;
+                                                                                                                            font-size: 12px;
+                                                                                                                            font-weight: 700;
+                                                                                                                            font-family: inherit;
+                                                                                                                            transition: border-color .15s ease, background .15s ease, color .15s ease;
+                                                                                                                            min-height: 44px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .reportBtn:hover {
+                                                                                                                            border-color: rgba(124, 77, 255, .45);
+                                                                                                                            background: rgba(124, 77, 255, .08);
+                                                                                                                            color: var(--text);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalOverlay {
+                                                                                                                            position: fixed;
+                                                                                                                            inset: 0;
+                                                                                                                            background: rgba(0, 0, 0, .65);
+                                                                                                                            display: flex;
+                                                                                                                            align-items: center;
+                                                                                                                            justify-content: center;
+                                                                                                                            z-index: 9999;
+                                                                                                                            padding: 18px;
+                                                                                                                            backdrop-filter: blur(4px);
+                                                                                                                            -webkit-backdrop-filter: blur(4px);
+                                                                                                                            transition: opacity .2s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalOverlay.hidden {
+                                                                                                                            display: none;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalCard {
+                                                                                                                            background: #0d0f1a;
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .10);
+                                                                                                                            border-radius: 18px;
+                                                                                                                            padding: 22px;
+                                                                                                                            max-width: 460px;
+                                                                                                                            width: 100%;
+                                                                                                                            box-shadow: 0 30px 80px rgba(0, 0, 0, .50);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalHeader {
+                                                                                                                            display: flex;
+                                                                                                                            justify-content: space-between;
+                                                                                                                            align-items: center;
+                                                                                                                            margin-bottom: 16px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalTitle {
+                                                                                                                            margin: 0;
+                                                                                                                            font-size: 18px;
+                                                                                                                            font-weight: 900;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalClose {
+                                                                                                                            appearance: none;
+                                                                                                                            border: none;
+                                                                                                                            background: none;
+                                                                                                                            color: var(--muted);
+                                                                                                                            font-size: 24px;
+                                                                                                                            cursor: pointer;
+                                                                                                                            padding: 4px 8px;
+                                                                                                                            border-radius: 8px;
+                                                                                                                            transition: background .15s ease, color .15s ease;
+                                                                                                                            min-width: 44px;
+                                                                                                                            min-height: 44px;
+                                                                                                                            display: flex;
+                                                                                                                            align-items: center;
+                                                                                                                            justify-content: center;
+                                                                                                                            font-family: inherit;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalClose:hover {
+                                                                                                                            background: rgba(255, 255, 255, .06);
+                                                                                                                            color: var(--text);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalLabel {
+                                                                                                                            display: block;
+                                                                                                                            color: var(--muted);
+                                                                                                                            font-size: 13px;
+                                                                                                                            font-weight: 700;
+                                                                                                                            margin-bottom: 12px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalLabel input,
+                                                                                                                        .modalLabel textarea {
+                                                                                                                            margin-top: 6px;
+                                                                                                                            width: 100%;
+                                                                                                                            font-family: inherit;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalTextarea {
+                                                                                                                            width: 100%;
+                                                                                                                            background: rgba(0, 0, 0, .20);
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .10);
+                                                                                                                            border-radius: 12px;
+                                                                                                                            padding: 12px;
+                                                                                                                            color: var(--text);
+                                                                                                                            outline: none;
+                                                                                                                            resize: vertical;
+                                                                                                                            transition: border-color .15s ease, box-shadow .15s ease;
+                                                                                                                            font-family: inherit;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalTextarea:focus {
+                                                                                                                            border-color: rgba(124, 77, 255, .65);
+                                                                                                                            box-shadow: 0 0 0 4px rgba(124, 77, 255, .15);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalInput {
+                                                                                                                            width: 100%;
+                                                                                                                            background: rgba(0, 0, 0, .20);
+                                                                                                                            border: 1px solid rgba(255, 255, 255, .10);
+                                                                                                                            border-radius: 12px;
+                                                                                                                            padding: 12px;
+                                                                                                                            color: var(--text);
+                                                                                                                            outline: none;
+                                                                                                                            transition: border-color .15s ease, box-shadow .15s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalInput:focus {
+                                                                                                                            border-color: rgba(124, 77, 255, .65);
+                                                                                                                            box-shadow: 0 0 0 4px rgba(124, 77, 255, .15);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalSubmit {
+                                                                                                                            width: 100%;
+                                                                                                                            margin-top: 4px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .modalThanks {
+                                                                                                                            text-align: center;
+                                                                                                                            padding: 20px;
+                                                                                                                            font-weight: 800;
+                                                                                                                            color: var(--accent2);
+                                                                                                                        }
+                                                                                                                        /* ============================================================
+                                                        7. MOBILE TOUCH & LAYOUT POLISH
+                                                           ============================================================ */
+                                                                                                                        /* Minimum touch targets for interactive elements */
+                                                                                                                        
+                                                                                                                        button,
+                                                                                                                        .chip,
+                                                                                                                        .recentPill,
+                                                                                                                        .faqQuestion,
+                                                                                                                        .reportBtn,
+                                                                                                                        .modalClose,
+                                                                                                                        .copyBtn,
+                                                                                                                        .installBtn,
+                                                                                                                        .historyItem {
+                                                                                                                            min-height: 44px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        button,
+                                                                                                                        .chip,
+                                                                                                                        .recentPill,
+                                                                                                                        .faqQuestion,
+                                                                                                                        .reportBtn,
+                                                                                                                        .modalClose,
+                                                                                                                        .copyBtn,
+                                                                                                                        .installBtn {
+                                                                                                                            min-width: 44px;
+                                                                                                                        }
+                                                                                                                        /* 16px font on input to prevent iOS zoom */
+                                                                                                                        
+                                                                                                                        .urlField input {
+                                                                                                                            font-size: 16px;
+                                                                                                                        }
+                                                                                                                        /* Ensure chips wrap properly at 375px */
+                                                                                                                        
+                                                                                                                        .chipGrid {
+                                                                                                                            display: flex;
+                                                                                                                            flex-wrap: wrap;
+                                                                                                                            gap: 8px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .chip {
+                                                                                                                            flex: 0 1 auto;
+                                                                                                                            min-width: 0;
+                                                                                                                            word-break: break-word;
+                                                                                                                        }
+                                                                                                                        /* Prevent horizontal scrolling */
+                                                                                                                        
+                                                                                                                        html,
+                                                                                                                        body {
+                                                                                                                            overflow-x: hidden;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        body {
+                                                                                                                            width: 100%;
+                                                                                                                            max-width: 100%;
+                                                                                                                            position: relative;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .container {
+                                                                                                                            max-width: 1040px;
+                                                                                                                            width: 100%;
+                                                                                                                            overflow-wrap: break-word;
+                                                                                                                        }
+                                                                                                                        /* Make history reposition below main card on mobile */
+                                                                                                                        
+                                                                                                                        @media (max-width: 860px) {
+                                                                                                                            .historyCard {
+                                                                                                                                grid-row: auto;
+                                                                                                                                margin-top: 0;
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                        /* Step cards stack on mobile */
+                                                                                                                        
+                                                                                                                        @media (max-width: 640px) {
+                                                                                                                            .stepsGrid {
+                                                                                                                                grid-template-columns: 1fr;
+                                                                                                                            }
+                                                                                                                            .skeletonRect {
+                                                                                                                                width: 100%;
+                                                                                                                                height: auto;
+                                                                                                                                aspect-ratio: 16/9;
+                                                                                                                            }
+                                                                                                                            .skeletonWrap {
+                                                                                                                                flex-direction: column;
+                                                                                                                            }
+                                                                                                                        }

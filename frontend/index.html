@@ -42,8 +42,19 @@
                 <button id="fetchBtn" type="button" class="primary">Fetch Video</button>
             </form>
 
+            <div id="recentLinks" class="recentLinks"></div>
+
             <div id="fetchState" class="state hidden" aria-live="polite">
-                <div class="spinner" aria-hidden="true"></div>
+                <!-- Skeleton Loading -->
+                <div id="skeletonWrap" class="skeletonWrap">
+                    <div class="skeletonRect"></div>
+                    <div class="skeletonBars">
+                        <div class="skeletonBar skeletonBarWide"></div>
+                        <div class="skeletonBar skeletonBarNarrow"></div>
+                    </div>
+                </div>
+                <!-- Fallback spinner (hidden when skeleton is shown) -->
+                <div class="spinner hidden" id="fallbackSpinner" aria-hidden="true"></div>
                 <div class="stateText" id="fetchStateText">Fetching…</div>
             </div>
 
@@ -102,6 +113,114 @@
             <div id="historyList" class="historyList" aria-live="polite"></div>
         </aside>
     </main>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <section class="container sectionHowItWorks fadeInSection" id="howItWorks">
+        <h2 class="sectionTitle">How It Works</h2>
+        <div class="stepsGrid">
+            <div class="stepCard fadeInItem">
+                <div class="stepBadge">1</div>
+                <div class="stepIcon">🔗</div>
+                <div class="stepTitle">Paste Link</div>
+                <div class="stepDesc">Copy any YouTube video URL and paste it above</div>
+            </div>
+            <div class="stepCard fadeInItem">
+                <div class="stepBadge">2</div>
+                <div class="stepIcon">⚙️</div>
+                <div class="stepTitle">Choose Quality</div>
+                <div class="stepDesc">Select your preferred resolution or audio-only format</div>
+            </div>
+            <div class="stepCard fadeInItem">
+                <div class="stepBadge">3</div>
+                <div class="stepIcon">⬇️</div>
+                <div class="stepTitle">Download</div>
+                <div class="stepDesc">Click download and save the file to your device</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="container sectionFaq fadeInSection" id="faq">
+        <h2 class="sectionTitle">FAQ</h2>
+        <div class="faqList">
+            <div class="faqItem">
+                <button class="faqQuestion" aria-expanded="false">
+                    <span>Is this free to use?</span>
+                    <span class="faqIcon" aria-hidden="true">+</span>
+                </button>
+                <div class="faqAnswer">
+                    <div>Yes, completely free with no hidden charges.</div>
+                </div>
+            </div>
+            <div class="faqItem">
+                <button class="faqQuestion" aria-expanded="false">
+                    <span>Is it safe to use this website?</span>
+                    <span class="faqIcon" aria-hidden="true">+</span>
+                </button>
+                <div class="faqAnswer">
+                    <div>Yes, we don't store your downloaded videos or personal data. All processing happens temporarily and files are cleaned up after download.</div>
+                </div>
+            </div>
+            <div class="faqItem">
+                <button class="faqQuestion" aria-expanded="false">
+                    <span>What video formats are supported?</span>
+                    <span class="faqIcon" aria-hidden="true">+</span>
+                </button>
+                <div class="faqAnswer">
+                    <div>You can download videos in MP4 format at various resolutions (1080p, 720p, 480p) or extract audio as MP3.</div>
+                </div>
+            </div>
+            <div class="faqItem">
+                <button class="faqQuestion" aria-expanded="false">
+                    <span>Can I download private or age-restricted videos?</span>
+                    <span class="faqIcon" aria-hidden="true">+</span>
+                </button>
+                <div class="faqAnswer">
+                    <div>No, only publicly available YouTube videos can be downloaded.</div>
+                </div>
+            </div>
+            <div class="faqItem">
+                <button class="faqQuestion" aria-expanded="false">
+                    <span>Is there a limit on video length or downloads?</span>
+                    <span class="faqIcon" aria-hidden="true">+</span>
+                </button>
+                <div class="faqAnswer">
+                    <div>No strict limits, though very long videos may take more time to process.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="container siteFooter">
+        <button id="reportBtn" class="reportBtn">Report an issue</button>
+    </footer>
+
+    <!-- ===== FEEDBACK MODAL ===== -->
+    <div id="feedbackModal" class="modalOverlay hidden" role="dialog" aria-modal="true" aria-label="Report an issue">
+        <div class="modalCard">
+            <div class="modalHeader">
+                <h3 class="modalTitle">Report an issue</h3>
+                <button id="modalCloseBtn" class="modalClose" aria-label="Close">&times;</button>
+            </div>
+            <form id="feedbackForm">
+                <label class="modalLabel">
+                    Describe the issue
+                    <textarea id="feedbackText" class="modalTextarea" rows="4" placeholder="What went wrong?" required></textarea>
+                </label>
+                <label class="modalLabel">
+                    Video URL (optional)
+                    <input id="feedbackUrl" class="modalInput" type="url" placeholder="Paste the YouTube URL if related" />
+                </label>
+                <div id="feedbackError" class="error hidden"></div>
+                <button id="feedbackSubmitBtn" type="submit" class="primary modalSubmit">Submit</button>
+            </form>
+            <div id="feedbackThanks" class="modalThanks hidden">Thank you, we'll look into it!</div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
     <div id="cookieStatus" class="cookieStatus" title="Cookie authentication status — visible only to admins">
         <span class="cookieDot" id="cookieDot"></span>

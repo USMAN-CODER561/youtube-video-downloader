@@ -387,6 +387,32 @@ app.get('/api/download/file/:jobId', (req, res) => {
     });
 });
 
+// --- Feedback endpoint ---
+const FEEDBACK_LOG = path.join(__dirname, 'feedback.log');
+
+app.post('/api/feedback', (req, res) => {
+    const body = req.body || {};
+    const text = typeof body.text === 'string' ? body.text.trim() : '';
+    const url = typeof body.url === 'string' ? body.url.trim() : '';
+
+    if (!text) {
+        return res.status(400).json({ ok: false, error: 'Missing feedback text.' });
+    }
+
+    const timestamp = new Date().toISOString();
+    const logLine = `[${timestamp}] ${text}${url ? ' | URL: ' + url : ''}\n`;
+
+    console.log('[feedback]', logLine.trim());
+
+    try {
+        fs.appendFileSync(FEEDBACK_LOG, logLine, 'utf8');
+    } catch (e) {
+        console.error('[feedback] Failed to write to log file:', e.message);
+    }
+
+    return res.json({ ok: true });
+});
+
 // Startup health check
 async function checkDependencies() {
     const ytDlpPath = getYtDlpPath();

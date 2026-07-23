@@ -172,6 +172,333 @@ function renderHistory() {
     }
 }
 
+// ============================================================
+// 3. SKELETON LOADING
+// ============================================================
+const skeletonWrap = document.getElementById('skeletonWrap');
+const fallbackSpinner = document.getElementById('fallbackSpinner');
+
+function showSkeleton() {
+    if (skeletonWrap) {
+        setHidden(skeletonWrap, false);
+    }
+    if (fallbackSpinner) {
+        setHidden(fallbackSpinner, true);
+    }
+}
+
+function hideSkeleton() {
+    if (skeletonWrap) {
+        setHidden(skeletonWrap, true);
+    }
+}
+
+// Patch the handleFetchVideo to show skeleton instead of spinner
+// by wrapping the original fetchState logic.
+const origSetHidden_fetch = setHidden;
+// We'll hook into handleFetchVideo by patching show/hide of fetchState.
+// Instead of modifying handleFetchVideo, we override the setHidden for fetchState
+// in a patch that runs when fetchState visibility changes.
+// Simpler: directly call showSkeleton/hideSkeleton in the fetch handler patches.
+
+// Store original fetch handler behavior then enhance it.
+(function patchFetchSkeleton() {
+    const origFetchFn = window.handleFetchVideo;
+    // We won't replace handleFetchVideo, we'll add observer approach.
+    // Actually easiest: directly modify handleFetchVideo below by appending to the function.
+    // Since we're adding code after, we can't modify it. Let's use a MutationObserver on fetchState.
+    if (!fetchState) return;
+    const observer = new MutationObserver(() => {
+        if (!fetchState.classList.contains('hidden')) {
+            showSkeleton();
+        }
+    });
+    observer.observe(fetchState, { attributes: true, attributeFilter: ['class'] });
+})();
+
+// Also call hideSkeleton when preview is shown — patch preview visibility.
+(function patchPreviewSkeleton() {
+    if (!preview) return;
+    const obs = new MutationObserver(() => {
+        if (!preview.classList.contains('hidden')) {
+            hideSkeleton();
+            // Add fade-in animation
+            preview.classList.remove('fadeInContent');
+            // Force reflow
+            void preview.offsetWidth;
+            preview.classList.add('fadeInContent');
+        }
+    });
+    obs.observe(preview, { attributes: true, attributeFilter: ['class'] });
+})();
+
+// ============================================================
+// 4. RECENT LINKS (session-based, resets on refresh)
+// ============================================================
+const recentLinksEl = document.getElementById('recentLinks');
+let recentLinks = []; // each: { url, title }
+
+function addRecentLink(url, title) {
+    // Remove duplicate if exists, move to top
+    recentLinks = recentLinks.filter(item => item.url !== url);
+    recentLinks.unshift({ url, title: title || url });
+    // Keep max 5
+    recentLinks = recentLinks.slice(0, 5);
+    renderRecentLinks();
+}
+
+function renderRecentLinks() {
+    if (!recentLinksEl) return;
+    if (!recentLinks.length) {
+        recentLinksEl.innerHTML = '';
+        return;
+    }
+    recentLinksEl.innerHTML = '';
+    for (const item of recentLinks) {
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'recentPill';
+        pill.textContent = item.title || item.url;
+        pill.title = item.url;
+        pill.addEventListener('click', () => {
+            urlInput.value = item.url;
+            // Auto-trigger fetch
+            handleFetchVideo();
+        });
+        recentLinksEl.appendChild(pill);
+    }
+}
+
+// Patch handleFetchVideo to add recent link on success
+(function patchRecentLinks() {
+    const orig = window.handleFetchVideo;
+    // We'll use a post-fetch hook via intercepting setHidden(preview, false)
+    const obs = new MutationObserver(() => {
+        if (!preview.classList.contains('hidden')) {
+            const url = urlInput.value.trim();
+            const title = titleEl ? titleEl.textContent : url;
+            if (url) {
+                addRecentLink(url, title);
+            }
+        }
+    });
+    if (preview) {
+        obs.observe(preview, { attributes: true, attributeFilter: ['class'] });
+    }
+})();
+
+// ============================================================
+// 5. COPY DOWNLOAD LINK
+// ============================================================
+const toastEl = document.getElementById('toast');
+
+function showToast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    setHidden(toastEl, false);
+    // After 2 seconds, fade out
+    clearTimeout(toastEl._hideTimer);
+    toastEl._hideTimer = setTimeout(() => {
+        setHidden(toastEl, true);
+    }, 2000);
+}
+
+// Patch renderHistory to add copy buttons
+const origRenderHistory = renderHistory;
+renderHistory = function() {
+    origRenderHistory.call(this);
+    // Add copy buttons to each history item
+    if (!historyList) return;
+    const items = historyList.querySelectorAll('.historyItem');
+    items.forEach((el, idx) => {
+        // Avoid duplicating if already has copyBtn
+        if (el.querySelector('.copyBtn')) return;
+        const item = history[idx];
+        if (!item) return;
+
+        const copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'copyBtn';
+        copyBtn.setAttribute('aria-label', 'Copy download link');
+        copyBtn.innerHTML = '📋';
+
+        // Tooltip for errors
+        const tooltip = document.createElement('span');
+        tooltip.className = 'copyTooltip';
+        tooltip.textContent = 'Copy link';
+        copyBtn.appendChild(tooltip);
+
+        copyBtn.addEventListener('click', async(e) => {
+            e.stopPropagation();
+            // Build the download link — we store the download URL in the history item
+            // Since we don't store the actual download URL, we use the history item's
+            // video URL to reconstruct.
+            const videoUrl = item._downloadUrl || '';
+            if (!videoUrl) {
+                // Try to provide feedback
+                tooltip.textContent = 'No link available';
+                tooltip.classList.add('show');
+                setTimeout(() => tooltip.classList.remove('show'), 1500);
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(videoUrl);
+                showToast('Link copied!');
+            } catch (err) {
+                tooltip.textContent = 'Copy failed';
+                tooltip.classList.add('show');
+                setTimeout(() => tooltip.classList.remove('show'), 1500);
+            }
+        });
+
+        el.appendChild(copyBtn);
+    });
+};
+
+// Store download URL in history when adding
+const origAddHistoryItem = addHistoryItem;
+addHistoryItem = function({ title, thumbnail, formatLabel, downloadUrl }) {
+    origAddHistoryItem.call(this, { title, thumbnail, formatLabel });
+    // Store download URL on the first item
+    if (history.length > 0 && downloadUrl) {
+        history[0]._downloadUrl = downloadUrl;
+    }
+    renderHistory();
+};
+
+// ============================================================
+// 2. FAQ ACCORDION
+// ============================================================
+document.querySelectorAll('.faqQuestion').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        // Close all others
+        document.querySelectorAll('.faqQuestion').forEach(other => {
+            if (other !== btn) {
+                other.setAttribute('aria-expanded', 'false');
+            }
+        });
+        btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+    });
+});
+
+// ============================================================
+// 6. FEEDBACK / REPORT ISSUE
+// ============================================================
+const reportBtn = document.getElementById('reportBtn');
+const feedbackModal = document.getElementById('feedbackModal');
+const modalCloseBtn = document.getElementById('modalCloseBtn');
+const feedbackForm = document.getElementById('feedbackForm');
+const feedbackText = document.getElementById('feedbackText');
+const feedbackUrl = document.getElementById('feedbackUrl');
+const feedbackError = document.getElementById('feedbackError');
+const feedbackSubmitBtn = document.getElementById('feedbackSubmitBtn');
+const feedbackThanks = document.getElementById('feedbackThanks');
+
+function openFeedbackModal() {
+    if (!feedbackModal) return;
+    // Auto-fill URL from input if present
+    const currentUrl = urlInput ? urlInput.value.trim() : '';
+    if (feedbackUrl) feedbackUrl.value = currentUrl;
+    if (feedbackText) feedbackText.value = '';
+    if (feedbackError) setHidden(feedbackError, true);
+    if (feedbackThanks) setHidden(feedbackThanks, true);
+    if (feedbackForm) setHidden(feedbackForm, false);
+    setHidden(feedbackModal, false);
+}
+
+function closeFeedbackModal() {
+    if (feedbackModal) setHidden(feedbackModal, true);
+}
+
+if (reportBtn) {
+    reportBtn.addEventListener('click', openFeedbackModal);
+}
+
+if (modalCloseBtn) {
+    modalCloseBtn.addEventListener('click', closeFeedbackModal);
+}
+
+// Close modal on overlay click
+if (feedbackModal) {
+    feedbackModal.addEventListener('click', (e) => {
+        if (e.target === feedbackModal) {
+            closeFeedbackModal();
+        }
+    });
+}
+
+// Escape key closes modal
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && feedbackModal && !feedbackModal.classList.contains('hidden')) {
+        closeFeedbackModal();
+    }
+});
+
+if (feedbackForm) {
+    feedbackForm.addEventListener('submit', async(e) => {
+        e.preventDefault();
+        if (feedbackSubmitBtn) feedbackSubmitBtn.disabled = true;
+        if (feedbackError) setHidden(feedbackError, true);
+
+        const text = feedbackText ? feedbackText.value.trim() : '';
+        const url = feedbackUrl ? feedbackUrl.value.trim() : '';
+
+        if (!text) {
+            if (feedbackError) {
+                feedbackError.textContent = 'Please describe the issue.';
+                setHidden(feedbackError, false);
+            }
+            if (feedbackSubmitBtn) feedbackSubmitBtn.disabled = false;
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text, url })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.ok) {
+                throw new Error(data.error || 'Failed to submit');
+            }
+            // Show thanks
+            if (feedbackForm) setHidden(feedbackForm, true);
+            if (feedbackThanks) setHidden(feedbackThanks, false);
+            setTimeout(closeFeedbackModal, 2000);
+        } catch (err) {
+            if (feedbackError) {
+                feedbackError.textContent = err.message || 'Failed to submit. Try again.';
+                setHidden(feedbackError, false);
+            }
+        } finally {
+            if (feedbackSubmitBtn) feedbackSubmitBtn.disabled = false;
+        }
+    });
+}
+
+// ============================================================
+// 1. HOW IT WORKS — Scroll-triggered fade-in
+// ============================================================
+(function initFadeInOnScroll() {
+    if (!('IntersectionObserver' in window)) {
+        // Fallback: show all immediately
+        document.querySelectorAll('.fadeInItem').forEach(el => el.classList.add('visible'));
+        return;
+    }
+    const observer = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                // Optionally unobserve after showing
+                observer.unobserve(entry.target);
+            }
+        }
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.fadeInItem').forEach(el => observer.observe(el));
+})();
+
 async function fetchInfo(url) {
     const res = await fetch('/api/info', {
         method: 'POST',
@@ -387,7 +714,8 @@ downloadBtn.addEventListener('click', async() => {
 
                     // Update history optimistically — the download has started
                     // The browser will show real progress in its native download tray
-                    addHistoryItem({ title, thumbnail: thumbSrc, formatLabel });
+                    const absDownloadUrl = window.location.origin + downloadUrl;
+                    addHistoryItem({ title, thumbnail: thumbSrc, formatLabel, downloadUrl: absDownloadUrl });
                 }
                 if (status === 'error') {
                     es.close();
