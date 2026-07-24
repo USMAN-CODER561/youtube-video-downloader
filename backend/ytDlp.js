@@ -67,9 +67,8 @@ function getDenoPath() {
             const p = String(which.stdout).trim();
             if (p) return p;
         }
-    }
-} catch {}
-return null;
+    } catch {}
+    return null;
 }
 
 /**
