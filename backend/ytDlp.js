@@ -6,7 +6,6 @@ const os = require('os');
 const WRITABLE_COOKIES_DIR = path.join(os.tmpdir(), 'yt-dlp-downloader-cookies');
 const WRITABLE_COOKIES_FILE = path.join(WRITABLE_COOKIES_DIR, 'cookies.txt');
 let _writableCookiesPath = null;
-let _cookiesEnabled = true; // Set to false when cookie validation fails at startup
 
 /**
  * Returns the absolute path to the yt-dlp binary.
@@ -48,8 +47,6 @@ function getFfmpegPath() {
 
 /**
  * Returns the absolute path to the Deno binary, or null if not found.
- * Deno is used by yt-dlp as a JavaScript runtime to solve YouTube's
- * signature/cipher challenges and unlock real video/audio format URLs.
  */
 function getDenoPath() {
     const envPath = process.env.YTDLP_DENO_PATH ? String(process.env.YTDLP_DENO_PATH).trim() : '';
@@ -70,8 +67,9 @@ function getDenoPath() {
             const p = String(which.stdout).trim();
             if (p) return p;
         }
-    } catch {}
-    return null;
+    }
+} catch {}
+return null;
 }
 
 /**
@@ -152,13 +150,13 @@ function getCookiesPath() {
 }
 
 /**
- * Enable or disable cookie-based authentication.
- * Called with false when the cookie health check fails at startup.
+ * Enable or disable cookies usage server-wide.
+ * @param {boolean} enabled
  */
 function setCookiesEnabled(enabled) {
     _cookiesEnabled = !!enabled;
     if (!_cookiesEnabled) {
-        console.log('[yt-dlp] Cookies DISABLED - falling back to TV/iOS client extraction only');
+        console.log('[yt-dlp] Cookies DISABLED - falling back to mweb/android_creator/web_creator client extraction only');
     }
 }
 
@@ -219,7 +217,7 @@ function runProcess({ command, args, onStdoutLine, onStderrLine, timeoutMs = 0 }
             if (code === 0) {
                 resolve({ code, stdout, stderr });
             } else {
-                console.error('[yt-dlp][raw-stderr]', stderr);
+                console.error("yt-dlp error output:", stderr);
                 const err = new Error(`yt-dlp exited with code ${code}`);
                 err.statusCode = 500;
                 err.stderr = stderr;
@@ -370,7 +368,7 @@ async function runDumpJson(url) {
         '--dump-json',
         '--no-playlist',
         '--socket-timeout', '5',
-        '--extractor-args', 'youtube:player_client=tv,ios',
+        '--extractor-args', 'youtube:player_client=mweb,android_creator,web_creator',
         '--no-warnings',
         '--user-agent', process.env.YTDLP_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36',
         ...getCookiesArgs(),
@@ -379,6 +377,7 @@ async function runDumpJson(url) {
     ];
     const { stdout, stderr } = await runProcess({ command: ytDlpCmd, args, timeoutMs: 10000 });
     if (!stdout || !String(stdout).trim().startsWith('{')) {
+        console.error("yt-dlp error output:", stderr);
         const err = new Error('yt-dlp did not return JSON');
         err.stderr = stderr;
         err.statusCode = 500;
@@ -407,7 +406,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
         '--no-playlist',
         '--newline',
         '--socket-timeout', '5',
-        '--extractor-args', 'youtube:player_client=tv,ios',
+        '--extractor-args', 'youtube:player_client=mweb,android_creator,web_creator',
         '--no-warnings',
         '--user-agent', process.env.YTDLP_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36',
         '--accept-language', process.env.YTDLP_ACCEPT_LANGUAGE || 'en-US,en;q=0.9',

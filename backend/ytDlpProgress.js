@@ -45,7 +45,7 @@ function runProcessStreaming({ command, args, onStdoutLine, onStderrLine, timeou
         child.on('close', (code) => {
             if (timeout) clearTimeout(timeout);
             if (code === 0) return resolve({ code });
-            console.error('[yt-dlp][raw-stderr]', stderrAccumulated);
+            console.error("yt-dlp error output:", stderrAccumulated);
             const err = new Error(`yt-dlp exited with code ${code}`);
             err.stderr = stderrAccumulated;
             reject(err);
@@ -60,7 +60,7 @@ function buildArgsForProgress({ url, formatId, outPattern, isMp3Choice, ffmpegPa
         '--progress-template',
         '%(progress)j',
         '--socket-timeout', '5',
-        '--extractor-args', 'youtube:player_client=tv,ios',
+        '--extractor-args', 'youtube:player_client=mweb,android_creator,web_creator',
         '--no-warnings',
         ...getCookiesArgs(),
         ...getJsRuntimeArgs(),

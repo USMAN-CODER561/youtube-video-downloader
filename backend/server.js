@@ -168,7 +168,7 @@ let cookieValidationResult = null; // { ok: boolean, checkedAt: ISO string }
 
 /**
  * Run a lightweight yt-dlp test against a known public video to check if cookies are valid.
- * Uses --socket-timeout 10 and --extractor-args youtube:player_client=tv,ios for fast results.
+ * Uses --socket-timeout 10 and --extractor-args youtube:player_client=mweb,android_creator,web_creator for fast results.
  * If cookies are missing or the check fails, cookies are disabled server-wide.
  * The server always continues running regardless of cookie status.
  * Returns { ok, checkedAt, message }.
@@ -177,14 +177,14 @@ async function checkCookieHealth() {
     const testUrl = `https://www.youtube.com/watch?v=${COOKIE_TEST_VIDEO_ID}`;
     const checkedAt = new Date().toISOString();
     try {
-        // Spawn yt-dlp directly with TV/iOS extractor + socket timeout
+        // Spawn yt-dlp directly with mweb/android_creator/web_creator extractor + socket timeout
         const ytDlpCmd = getYtDlpPath();
         const cookiesPath = getCookiesPath();
         const args = [
             '--dump-json',
             '--no-playlist',
             '--socket-timeout', '10',
-            '--extractor-args', 'youtube:player_client=tv,ios',
+            '--extractor-args', 'youtube:player_client=mweb,android_creator,web_creator',
             '--no-warnings',
         ];
 
@@ -194,13 +194,13 @@ async function checkCookieHealth() {
         } else {
             // No cookies file at all - disable cookies silently
             setCookiesEnabled(false);
-            cookieValidationResult = { ok: false, checkedAt, message: 'No cookies file found - using TV/iOS clients' };
-            console.log('[startup][cookies] No cookies file found - cookies disabled, falling back to TV/iOS clients');
+            cookieValidationResult = { ok: false, checkedAt, message: 'No cookies file found - using mweb/android_creator/web_creator clients' };
+            console.log('[startup][cookies] No cookies file found - cookies disabled, falling back to mweb/android_creator/web_creator clients');
             return cookieValidationResult;
         }
         args.push(testUrl);
 
-        const { stdout } = await new Promise((resolve, reject) => {
+        const { stdout, stderr } = await new Promise((resolve, reject) => {
             const child = spawn(ytDlpCmd, args, { windowsHide: true });
             let stdout = '';
             let stderr = '';
@@ -212,12 +212,15 @@ async function checkCookieHealth() {
                 err.stderr = stderr;
                 reject(err);
             }, 15000);
-            child.on('error', (err) => { clearTimeout(timeout);
-                reject(err); });
+            child.on('error', (err) => {
+                clearTimeout(timeout);
+                reject(err);
+            });
             child.on('close', (code) => {
                 clearTimeout(timeout);
                 if (code === 0) resolve({ stdout, stderr });
                 else {
+                    console.error("yt-dlp error output:", stderr);
                     const err = new Error(`yt-dlp exited with code ${code}`);
                     err.stderr = stderr;
                     err.stdout = stdout;
@@ -239,7 +242,7 @@ async function checkCookieHealth() {
     } catch (err) {
         // Cookies failed - disable them and continue running
         setCookiesEnabled(false);
-        cookieValidationResult = { ok: false, checkedAt, message: 'Cookie validation failed - cookies disabled, falling back to TV/iOS clients' };
+        cookieValidationResult = { ok: false, checkedAt, message: 'Cookie validation failed - cookies disabled, falling back to mweb/android_creator/web_creator clients' };
         console.warn('[startup][cookies] Cookie check failed:', (err.message || err.stderr || '').slice(0, 200));
         return cookieValidationResult;
     }
@@ -376,7 +379,6 @@ app.post('/api/download', async(req, res) => {
 
             // Find produced file and store it for /api/download/file/:jobId
             const workFiles = fs.readdirSync(workDir);
-            // outPattern is `${asciiBase}.%(ext)s` so files start with `${asciiBase}.`
             const candidates = workFiles
                 .filter((fn) => fn.startsWith(`${asciiBase}.`))
                 .map((fn) => ({
@@ -523,75 +525,27 @@ async function checkDependencies() {
         ffmpegOk = true;
     } catch (err) {
         console.error('[startup] FAILED - ffmpeg not found at "' + ffmpegPath + '". ' + err.message);
-        console.error('[startup] Install ffmpeg and set FFMPEG_PATH, or run ./build.sh');
+        console.error('[startup] Download ffmpeg and set FFMPEG_PATH, or run ./build.sh');
     }
-
-    if (!ytDlpOk || !ffmpegOk) {
-        console.warn('[startup] WARNING: One or more dependencies are missing. Downloads will fail until this is resolved.');
-    }
-
-    // Check Deno (JavaScript runtime for YouTube signature solving)
-    const denoPath = getDenoPath();
-    if (denoPath) {
-        try {
-            const denoOut = await new Promise((resolve, reject) => {
-                const child = spawn(denoPath, ['--version'], { stdio: ['ignore', 'pipe', 'pipe'] });
-                let out = '';
-                child.stdout.on('data', (chunk) => { out += chunk; });
-                child.on('error', reject);
-                child.on('close', (code) => {
-                    if (code === 0) resolve(out.split('\n')[0].trim());
-                    else reject(new Error('exit code ' + code));
-                });
-            });
-            console.log('[startup] Deno OK - ' + denoPath + ' (' + denoOut + ')');
-        } catch (err) {
-            console.warn('[startup] Deno found at "' + denoPath + '" but failed to run: ' + err.message);
-        }
-    } else {
-        console.warn('[startup] Deno NOT FOUND - YouTube signature solving disabled. Some formats may be missing.');
-        console.warn('[startup] Install Deno via ./build.sh or set YTDLP_DENO_PATH');
-    }
-
-    const writableCookiesPath = initCookiesCopy();
-
-    const cookiesPath = getCookiesPath();
-    if (cookiesPath) {
-        const sourcePath = getSourceCookiesPath();
-        console.log('[startup] Cookies source (read-only):', sourcePath);
-        console.log('[startup] Cookies writable copy:', writableCookiesPath || '(copy failed, using source directly)');
-        console.log('[startup] Cookies active path:', cookiesPath);
-        try {
-            const cookiesStat = fs.statSync(cookiesPath);
-            console.log('[startup] Cookies file size:', cookiesStat.size, 'bytes');
-            const cookiesContent = fs.readFileSync(cookiesPath, 'utf8');
-            const firstLine = cookiesContent.split(/\r?\n/)[0] || '(empty file)';
-            console.log('[startup] Cookies file first line:', firstLine);
-        } catch (e) {
-            console.error('[startup] Could not read cookies file details:', e.message);
-        }
-    } else {
-        console.warn('[startup] No cookies file found - some videos may show "login required" errors');
-        console.warn('[startup] Export YouTube cookies as cookies.txt and set YTDLP_COOKIES_PATH or place at /etc/secrets/cookies.txt');
-    }
+    return { ytDlpOk, ffmpegOk };
 }
 
-app.listen(PORT, async() => {
-    console.log('yt-dlp downloader running at http://localhost:' + PORT);
+// Start server
+(async() => {
     await checkDependencies();
-    // Initial cookie validation test — logs result so we can track cookie lifetime
-    // Does NOT crash the server if cookies fail — server continues with TV/iOS fallback.
-    try {
-        const health = await checkCookieHealth();
-        if (health.ok) {
-            console.log('[startup][cookies] Cookies VALID at ' + health.checkedAt + ' - testing video ' + COOKIE_TEST_VIDEO_ID);
-        } else {
-            console.warn('[startup][cookies] Cookies INVALID at ' + health.checkedAt + ' - ' + (health.message || 'unknown error'));
-            console.warn('[startup][cookies] Warning: Cookies disabled, falling back to TV/iOS clients');
+
+    // Run cookie health check on startup (non-blocking, logs result)
+    checkCookieHealth().then((result) => {
+        console.log('[startup] Cookie health:', result.ok ? 'OK' : 'FAILED');
+        if (result.message) {
+            console.log('[startup] Cookie message:', result.message);
         }
-    } catch (e) {
-        // Safety net — checkCookieHealth now handles all errors internally
-        console.warn('[startup][cookies] Cookie health check threw:', e.message);
-        console.warn('[startup][cookies] Warning: Cookies disabled, falling back to TV/iOS clients');
-    }
-});
+    }).catch((err) => {
+        console.warn('[startup] Cookie check threw:', err.message);
+    });
+
+    app.listen(PORT, () => {
+        console.log(`[server] Listening on http://localhost:${PORT}`);
+        console.log(`[server] Health check: http://localhost:${PORT}/healthz`);
+    });
+})();
