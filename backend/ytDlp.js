@@ -6,6 +6,7 @@ const os = require('os');
 const WRITABLE_COOKIES_DIR = path.join(os.tmpdir(), 'yt-dlp-downloader-cookies');
 const WRITABLE_COOKIES_FILE = path.join(WRITABLE_COOKIES_DIR, 'cookies.txt');
 let _writableCookiesPath = null;
+let _cookiesEnabled = true;
 
 /**
  * Returns the absolute path to the yt-dlp binary.
@@ -366,7 +367,7 @@ async function runDumpJson(url) {
     const args = [
         '--dump-json',
         '--no-playlist',
-        '--socket-timeout', '5',
+        '--socket-timeout', '15',
         '--extractor-args', 'youtube:player_client=mweb,android_creator,web_creator',
         '--no-warnings',
         '--user-agent', process.env.YTDLP_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36',
@@ -374,7 +375,7 @@ async function runDumpJson(url) {
         ...jsArgs,
         validated,
     ];
-    const { stdout, stderr } = await runProcess({ command: ytDlpCmd, args, timeoutMs: 10000 });
+    const { stdout, stderr } = await runProcess({ command: ytDlpCmd, args, timeoutMs: 25000 });
     if (!stdout || !String(stdout).trim().startsWith('{')) {
         console.error("yt-dlp error output:", stderr);
         const err = new Error('yt-dlp did not return JSON');
@@ -404,7 +405,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
     const common = [
         '--no-playlist',
         '--newline',
-        '--socket-timeout', '5',
+        '--socket-timeout', '15',
         '--extractor-args', 'youtube:player_client=mweb,android_creator,web_creator',
         '--no-warnings',
         '--user-agent', process.env.YTDLP_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36',
@@ -435,7 +436,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
             validated,
         ];
     }
-    await runProcess({ command: ytDlpCmd, args, timeoutMs: 10000 });
+    await runProcess({ command: ytDlpCmd, args, timeoutMs: 30000 });
     const files = fs.readdirSync(outDir);
     const candidates = files
         .filter((fn) => fn.startsWith(safeBase + '.'))
