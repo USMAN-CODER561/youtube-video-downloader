@@ -9,6 +9,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="yt-DL" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/icons/icon-192.svg" />
     <link rel="stylesheet" href="/styles.css" />
@@ -193,7 +196,14 @@
 
     <!-- ===== FOOTER ===== -->
     <footer class="container siteFooter">
-        <button id="reportBtn" class="reportBtn">Report an issue</button>
+        <div class="footerInner">
+            <div class="footerBrand">
+                <span class="footerLogo" aria-hidden="true">▶</span>
+                <span class="footerName">yt-Downloader</span>
+            </div>
+            <button id="reportBtn" class="reportBtn">Report an issue</button>
+            <p class="footerCopy">&copy; 2024 yt-Downloader &mdash; Free &amp; open-source tool</p>
+        </div>
     </footer>
 
     <!-- ===== FEEDBACK MODAL ===== -->
