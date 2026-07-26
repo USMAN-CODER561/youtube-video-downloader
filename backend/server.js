@@ -7,7 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 
-const { getYtDlpPath, getFfmpegPath, getCookiesPath, getSourceCookiesPath, getDenoPath, initCookiesCopy, setCookiesEnabled, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
+const { getYtDlpPath, getFfmpegPath, getCookiesPath, getSourceCookiesPath, getDenoPath, initCookiesCopy, runDumpJson, runDownloadToFile, parseDumpJsonToInfo } = require('./ytDlp');
 const { runDownloadWithProgress } = require('./ytDlpProgress');
 const progressStore = require('./progressStore');
 const downloadFilesStore = require('./downloadFilesStore');
@@ -192,10 +192,8 @@ async function checkCookieHealth() {
         if (cookiesPath) {
             args.push('--cookies', cookiesPath);
         } else {
-            // No cookies file at all - disable cookies silently
-            setCookiesEnabled(false);
             cookieValidationResult = { ok: false, checkedAt, message: 'No cookies file found - using mweb/android_creator/web_creator clients' };
-            console.log('[startup][cookies] No cookies file found - cookies disabled, falling back to mweb/android_creator/web_creator clients');
+            console.log('[startup][cookies] No cookies file found - falling back to mweb/android_creator/web_creator clients');
             return cookieValidationResult;
         }
         args.push(testUrl);
@@ -235,14 +233,11 @@ async function checkCookieHealth() {
             return cookieValidationResult;
         }
 
-        // Non-JSON output means something went wrong even with cookies
-        setCookiesEnabled(false);
-        cookieValidationResult = { ok: false, checkedAt, message: 'Cookie test returned non-JSON output - disabling cookies' };
+        // Non-JSON output means something went wrong
+        cookieValidationResult = { ok: false, checkedAt, message: 'Cookie test returned non-JSON output' };
         return cookieValidationResult;
     } catch (err) {
-        // Cookies failed - disable them and continue running
-        setCookiesEnabled(false);
-        cookieValidationResult = { ok: false, checkedAt, message: 'Cookie validation failed - cookies disabled, falling back to mweb/android_creator/web_creator clients' };
+        cookieValidationResult = { ok: false, checkedAt, message: 'Cookie validation failed' };
         console.warn('[startup][cookies] Cookie check failed:', (err.message || err.stderr || '').slice(0, 200));
         return cookieValidationResult;
     }

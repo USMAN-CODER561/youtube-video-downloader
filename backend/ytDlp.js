@@ -161,11 +161,15 @@ function setCookiesEnabled(enabled) {
 }
 
 /**
- * Returns the --cookies CLI args array if cookies are available AND enabled.
+ * Returns the --cookies CLI args array if a cookies file is available.
+ * NOTE: This does NOT check _cookiesEnabled. The startup cookie health check
+ * is a diagnostic only — it no longer gates actual cookie usage. Every real
+ * yt-dlp request ALWAYS attempts to use cookies if the file exists, letting
+ * each request succeed or fail on its own merits.
  */
 function getCookiesArgs() {
     const cp = getCookiesPath();
-    if (cp && _cookiesEnabled) return ['--cookies', cp];
+    if (cp) return ['--cookies', cp];
     return [];
 }
 
