@@ -371,7 +371,7 @@ async function runDumpJson(url) {
     const args = [
         '--dump-json',
         '--no-playlist',
-        '--socket-timeout', '15',
+        '--socket-timeout', '45',
         '--extractor-args', 'youtube:player_client=mweb,android_creator,web_creator',
         '--no-warnings',
         '--user-agent', process.env.YTDLP_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36',
@@ -379,7 +379,7 @@ async function runDumpJson(url) {
         ...jsArgs,
         validated,
     ];
-    const { stdout, stderr } = await runProcess({ command: ytDlpCmd, args, timeoutMs: 25000 });
+    const { stdout, stderr } = await runProcess({ command: ytDlpCmd, args, timeoutMs: 60000 });
     if (!stdout || !String(stdout).trim().startsWith('{')) {
         console.error("yt-dlp error output:", stderr);
         const err = new Error('yt-dlp did not return JSON');
@@ -409,7 +409,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
     const common = [
         '--no-playlist',
         '--newline',
-        '--socket-timeout', '15',
+        '--socket-timeout', '45',
         '--extractor-args', 'youtube:player_client=mweb,android_creator,web_creator',
         '--no-warnings',
         '--user-agent', process.env.YTDLP_USER_AGENT || 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123 Safari/537.36',
@@ -440,7 +440,7 @@ async function runDownloadToFile({ url, formatId, outDir, outNameBase }) {
             validated,
         ];
     }
-    await runProcess({ command: ytDlpCmd, args, timeoutMs: 30000 });
+    await runProcess({ command: ytDlpCmd, args, timeoutMs: 60000 });
     const files = fs.readdirSync(outDir);
     const candidates = files
         .filter((fn) => fn.startsWith(safeBase + '.'))

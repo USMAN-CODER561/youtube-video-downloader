@@ -261,11 +261,11 @@ app.get('/api/cookie-status', async(_req, res) => {
 });
 
 app.post('/api/info', async(req, res) => {
-    // Enforce a hard 15-second ceiling for the entire info request
+    // Enforce a hard 45-second ceiling for the entire info request (accounts for cold start + slow YouTube)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
         controller.abort();
-    }, 15000);
+    }, 45000);
 
     try {
         const body = req.body || {};
@@ -286,7 +286,7 @@ app.post('/api/info', async(req, res) => {
 
         // Detect abort/timeout signals
         if (controller.signal.aborted || (err && (err.code === 'ETIMEDOUT' || err.message === 'yt-dlp timed out' || err.toString().includes('timed out') || err.toString().includes('AbortError')))) {
-            console.error('[yt-dlp][api/info][timeout] Request timed out after 15s for url:', req.body && req.body.url);
+            console.error('[yt-dlp][api/info][timeout] Request timed out after 45s for url:', req.body && req.body.url);
             return res.status(504).json({ ok: false, error: 'Request timed out, YouTube is taking too long to respond.' });
         }
 

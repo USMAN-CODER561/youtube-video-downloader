@@ -1,7 +1,7 @@
 const { spawn } = require('child_process');
 const { getYtDlpPath, getCookiesArgs, getJsRuntimeArgs } = require('./ytDlp');
 
-function runProcessStreaming({ command, args, onStdoutLine, onStderrLine, timeoutMs = 10000 }) {
+function runProcessStreaming({ command, args, onStdoutLine, onStderrLine, timeoutMs = 60000 }) {
     return new Promise((resolve, reject) => {
         const child = spawn(command, args, { windowsHide: true });
 
@@ -59,7 +59,7 @@ function buildArgsForProgress({ url, formatId, outPattern, isMp3Choice, ffmpegPa
         '--progress',
         '--progress-template',
         '%(progress)j',
-        '--socket-timeout', '5',
+        '--socket-timeout', '45',
         '--extractor-args', 'youtube:player_client=mweb,android_creator,web_creator',
         '--no-warnings',
         ...getCookiesArgs(),

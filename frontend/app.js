@@ -501,7 +501,7 @@ if (feedbackForm) {
 
 async function fetchInfo(url) {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
 
     try {
         const res = await fetch('/api/info', {
@@ -548,7 +548,7 @@ async function handleFetchVideo() {
     urlInput.disabled = true;
 
     setHidden(fetchState, false);
-    if (fetchStateText) fetchStateText.textContent = 'Fetching video info…';
+    if (fetchStateText) fetchStateText.textContent = 'Fetching video info… (may take up to 30s on first load)';
 
     try {
         const video = await fetchInfo(url);
@@ -641,12 +641,12 @@ downloadBtn.addEventListener('click', async() => {
     setHidden(progressWrap, false);
     if (progressBarFill) progressBarFill.style.width = '0%';
     if (progressLabel) progressLabel.textContent = '0%';
-    if (progressSubText) progressSubText.textContent = 'Preparing…';
+    if (progressSubText) progressSubText.textContent = 'Preparing… (may take up to 30s on first load)';
 
     try {
-        // 1) Start download job (backend returns jobId immediately) — with 15s timeout
+        // 1) Start download job (backend returns jobId immediately) — with 45s timeout (cold-start friendly)
         const downloadController = new AbortController();
-        const downloadTimeoutId = setTimeout(() => downloadController.abort(), 15000);
+        const downloadTimeoutId = setTimeout(() => downloadController.abort(), 45000);
 
         let startRes;
         try {
