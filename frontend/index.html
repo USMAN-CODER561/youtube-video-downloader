@@ -232,6 +232,18 @@
     <!-- ===== TOAST ===== -->
     <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
+    <!-- ===== UPDATE BANNER ===== -->
+    <div id="updateBanner" class="updateBanner hidden" role="alert">
+        <div class="updateBannerInner">
+            <span class="updateBannerIcon" aria-hidden="true">🔄</span>
+            <span class="updateBannerText">A new version is available!</span>
+            <div class="updateBannerActions">
+                <button id="updateRefreshBtn" class="updateRefreshBtn">Refresh</button>
+                <button id="updateDismissBtn" class="updateDismissBtn">Dismiss</button>
+            </div>
+        </div>
+    </div>
+
     <div id="cookieStatus" class="cookieStatus" title="Cookie authentication status — visible only to admins">
         <span class="cookieDot" id="cookieDot"></span>
         <span class="cookieLabel" id="cookieLabel">Cookies: checking…</span>

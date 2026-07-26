@@ -769,16 +769,120 @@ downloadBtn.addEventListener('click', async() => {
 });
 
 // --- Service Worker Registration ---
+// Aggressive update detection: periodic checks + on visibility change
+let swRegistration = null;
+
 if ('serviceWorker' in navigator) {
+    // Register the service worker
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/service-worker.js').then((reg) => {
             console.log('[SW] Registered successfully, scope:', reg.scope);
+            swRegistration = reg;
+
+            // When the SW detects a new version is waiting, notify the user
+            reg.onupdatefound = () => {
+                const installingWorker = reg.installing;
+                if (!installingWorker) return;
+
+                installingWorker.onstatechange = () => {
+                    if (installingWorker.state === 'installed') {
+                        // Check if there's already a controller (means this is an update, not first install)
+                        if (navigator.serviceWorker.controller) {
+                            console.log('[SW] New version available! Showing update banner.');
+                            showUpdateBanner();
+                        } else {
+                            console.log('[SW] First time installed. Content cached.');
+                        }
+                    }
+                };
+            };
         }, (err) => {
             console.warn('[SW] Registration failed:', err);
         });
+
+        // Listen for messages from the service worker
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'SW_VERSION_ACTIVATED') {
+                console.log('[SW] Version activated:', event.data.version);
+                // A new SW just took over — show update banner so user can refresh
+                showUpdateBanner();
+            }
+        });
     });
+
+    // ----- AGGRESSIVE UPDATE CHECKING -----
+
+    // 1. Check for updates when page visibility changes (user returns to tab)
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && swRegistration) {
+            console.log('[SW] Visibility changed — checking for updates');
+            swRegistration.update().catch((err) => {
+                console.warn('[SW] Update check failed:', err);
+            });
+        }
+    });
+
+    // 2. Check for updates when window gains focus (user switches back to this tab)
+    window.addEventListener('focus', () => {
+        if (swRegistration) {
+            console.log('[SW] Window focused — checking for updates');
+            swRegistration.update().catch((err) => {
+                console.warn('[SW] Update check failed:', err);
+            });
+        }
+    });
+
+    // 3. Periodic check every 60 minutes
+    setInterval(() => {
+        if (swRegistration) {
+            console.log('[SW] Periodic update check');
+            swRegistration.update().catch((err) => {
+                console.warn('[SW] Periodic update check failed:', err);
+            });
+        }
+    }, 60 * 60 * 1000);
+
 } else {
     console.log('[SW] Service workers not supported in this browser');
+}
+
+/**
+ * Show a persistent "New version available" banner with a refresh button.
+ * The banner stays until the user clicks "Refresh" or manually refreshes.
+ */
+function showUpdateBanner() {
+    const banner = document.getElementById('updateBanner');
+    if (!banner) return;
+
+    // Remove hidden class to show the banner
+    banner.classList.remove('hidden');
+
+    // Add a click handler to the refresh button if not already added
+    const refreshBtn = document.getElementById('updateRefreshBtn');
+    if (refreshBtn && !refreshBtn._listenerAttached) {
+        refreshBtn.addEventListener('click', () => {
+            // Force the waiting SW to become active, then reload
+            if (swRegistration && swRegistration.waiting) {
+                // Tell the waiting SW to skip waiting (same as self.skipWaiting())
+                swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            }
+            // Also fallback: just reload the page
+            window.location.reload();
+        });
+        refreshBtn._listenerAttached = true;
+    }
+
+    const dismissBtn = document.getElementById('updateDismissBtn');
+    if (dismissBtn && !dismissBtn._listenerAttached) {
+        dismissBtn.addEventListener('click', () => {
+            banner.classList.add('hidden');
+            // Re-show after 30 minutes if not updated
+            setTimeout(() => {
+                banner.classList.remove('hidden');
+            }, 30 * 60 * 1000);
+        });
+        dismissBtn._listenerAttached = true;
+    }
 }
 
 // --- Install App (PWA) Button ---

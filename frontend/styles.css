@@ -410,6 +410,114 @@
                                                                                                                             color: var(--muted);
                                                                                                                             font-size: 12px;
                                                                                                                         }
+                                                                                                                        /* ============================================================
+   UPDATE BANNER — Persistent sticky banner at the top
+   ============================================================ */
+                                                                                                                        
+                                                                                                                        .updateBanner {
+                                                                                                                            position: fixed;
+                                                                                                                            top: 0;
+                                                                                                                            left: 0;
+                                                                                                                            right: 0;
+                                                                                                                            z-index: 10001;
+                                                                                                                            background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(124, 77, 255, 0.15));
+                                                                                                                            border-bottom: 1px solid rgba(0, 212, 255, 0.25);
+                                                                                                                            backdrop-filter: blur(16px);
+                                                                                                                            -webkit-backdrop-filter: blur(16px);
+                                                                                                                            padding: 10px 18px;
+                                                                                                                            animation: slideDown 0.3s ease both;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        @keyframes slideDown {
+                                                                                                                            from {
+                                                                                                                                opacity: 0;
+                                                                                                                                transform: translateY(-100%);
+                                                                                                                            }
+                                                                                                                            to {
+                                                                                                                                opacity: 1;
+                                                                                                                                transform: translateY(0);
+                                                                                                                            }
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .updateBannerInner {
+                                                                                                                            max-width: 1040px;
+                                                                                                                            margin: 0 auto;
+                                                                                                                            display: flex;
+                                                                                                                            align-items: center;
+                                                                                                                            justify-content: center;
+                                                                                                                            gap: 12px;
+                                                                                                                            flex-wrap: wrap;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .updateBannerIcon {
+                                                                                                                            font-size: 18px;
+                                                                                                                            line-height: 1;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .updateBannerText {
+                                                                                                                            font-weight: 700;
+                                                                                                                            font-size: 14px;
+                                                                                                                            color: var(--text);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .updateBannerActions {
+                                                                                                                            display: flex;
+                                                                                                                            gap: 8px;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .updateRefreshBtn {
+                                                                                                                            appearance: none;
+                                                                                                                            border: 1px solid rgba(0, 212, 255, 0.4);
+                                                                                                                            background: rgba(0, 212, 255, 0.12);
+                                                                                                                            color: var(--accent2);
+                                                                                                                            padding: 6px 14px;
+                                                                                                                            border-radius: 8px;
+                                                                                                                            cursor: pointer;
+                                                                                                                            font-weight: 700;
+                                                                                                                            font-size: 12px;
+                                                                                                                            font-family: inherit;
+                                                                                                                            min-height: 36px;
+                                                                                                                            min-width: 44px;
+                                                                                                                            transition: background 0.15s ease, border-color 0.15s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .updateRefreshBtn:hover {
+                                                                                                                            background: rgba(0, 212, 255, 0.25);
+                                                                                                                            border-color: rgba(0, 212, 255, 0.7);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .updateDismissBtn {
+                                                                                                                            appearance: none;
+                                                                                                                            border: 1px solid rgba(255, 255, 255, 0.1);
+                                                                                                                            background: rgba(255, 255, 255, 0.04);
+                                                                                                                            color: var(--muted);
+                                                                                                                            padding: 6px 14px;
+                                                                                                                            border-radius: 8px;
+                                                                                                                            cursor: pointer;
+                                                                                                                            font-weight: 600;
+                                                                                                                            font-size: 12px;
+                                                                                                                            font-family: inherit;
+                                                                                                                            min-height: 36px;
+                                                                                                                            min-width: 44px;
+                                                                                                                            transition: background 0.15s ease, color 0.15s ease;
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        .updateDismissBtn:hover {
+                                                                                                                            background: rgba(255, 255, 255, 0.1);
+                                                                                                                            color: var(--text);
+                                                                                                                        }
+                                                                                                                        
+                                                                                                                        @media (max-width: 480px) {
+                                                                                                                            .updateBannerInner {
+                                                                                                                                flex-direction: column;
+                                                                                                                                gap: 8px;
+                                                                                                                                text-align: center;
+                                                                                                                            }
+                                                                                                                            .updateBannerActions {
+                                                                                                                                width: 100%;
+                                                                                                                                justify-content: center;
+                                                                                                                            }
+                                                                                                                        }
                                                                                                                         /* Install App button — subtle, in the header */
                                                                                                                         
                                                                                                                         .installBtn {
